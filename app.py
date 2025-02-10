@@ -1,0 +1,484 @@
+from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask_mysqldb import MySQL
+from werkzeug.security import generate_password_hash, check_password_hash
+import os
+from MySQLdb import IntegrityError
+import requests
+
+
+app = Flask(__name__)
+app.secret_key = 'x2f4'
+
+# MySQL Config
+app.config['MYSQL_HOST'] = 'localhost'
+app.config['MYSQL_USER'] = 'root'
+app.config['MYSQL_PORT']  = 3306
+app.config['MYSQL_PASSWORD'] = 'Root@123'
+app.config['MYSQL_DB'] = 'UserAuthDB'
+UPLOAD_FOLDER = 'uploads'
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+mysql = MySQL(app)
+
+# File Upload Config
+app.config['UPLOAD_FOLDER'] = 'uploads'
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+        confirm_password = request.form['confirm_password']
+
+        # Check if passwords match
+        if password != confirm_password:
+            flash("Passwords do not match", "danger")
+            return redirect(url_for('register'))
+
+        # Hash the password
+        hashed_password = generate_password_hash(password)
+
+        try:
+            cur = mysql.connection.cursor()
+
+            # Insert the user into the database
+            cur.execute(
+                "INSERT INTO users (email, password) VALUES (%s, %s)", 
+                (email, hashed_password)
+            )
+            mysql.connection.commit()
+            cur.close()
+
+            flash("You have successfully registered! Please login.", "success")
+            return redirect(url_for('login'))
+
+        except IntegrityError as e:
+            if e.args[0] == 1062:  # Duplicate entry error code
+                flash("Email is already registered. Please use a different email.", "danger")
+            else:
+                flash("An unexpected error occurred. Please try again.", "danger")
+            return redirect(url_for('register'))
+
+    return render_template('register.html')
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+
+        cur = mysql.connection.cursor()
+        cur.execute("SELECT * FROM users WHERE email = %s", (email,))
+        user = cur.fetchone()
+        cur.close()
+
+        if user and check_password_hash(user[2], password):
+            session['email'] = email
+            flash("You have successfully logged in!.", "success")
+            return redirect(url_for('home'))
+        else:
+            flash("Invalid credentials", "danger")
+    return render_template('login.html')
+
+
+@app.route('/logout')
+def logout():
+    session.pop('email', None)
+    flash("You have been logged out", "info")
+    return redirect(url_for('login'))
+
+@app.route('/request_reset', methods=['GET', 'POST'])
+def request_reset():
+    if request.method == 'POST':
+        email = request.form['email']
+
+        cur = mysql.connection.cursor()
+        cur.execute("SELECT * FROM users WHERE email = %s", (email,))
+        user = cur.fetchone()
+        cur.close()
+
+        if user:
+            session['reset_email'] = email
+            return redirect(url_for('reset_password'))
+        flash("Email not found", "danger")
+    return render_template('request_reset.html')
+
+@app.route('/reset_password', methods=['GET', 'POST'])
+def reset_password():
+    if 'reset_email' not in session:
+        return redirect(url_for('request_reset'))
+
+    if request.method == 'POST':
+        new_password = request.form['new_password']
+        confirm_new_password = request.form['confirm_new_password']
+
+        if new_password != confirm_new_password:
+            flash("Passwords do not match", "danger")
+            return redirect(url_for('reset_password'))
+
+        hashed_password = generate_password_hash(new_password)
+        cur = mysql.connection.cursor()
+        cur.execute("UPDATE users SET password = %s WHERE email = %s", (hashed_password, session['reset_email']))
+        mysql.connection.commit()
+        cur.close()
+
+        session.pop('reset_email', None)
+        flash("Password reset successful", "success")
+        return redirect(url_for('login'))
+
+    return render_template('reset_password.html')
+
+@app.route('/')
+def home():
+    if 'email' in session:
+        return render_template('home.html', email=session['email'])
+    return redirect(url_for('login'))
+
+@app.route('/add_link', methods=['GET','POST'])
+def add_link():
+    # Check if the user is logged in (this assumes you have the session management in place)
+    if 'email' not in session:
+        return redirect(url_for('login'))  # Redirect to login if not logged in
+
+    if request.method == 'POST':
+        # Handle website URL
+        if 'website_url' in request.form:
+            website_url = request.form['website_url']
+            if website_url:
+                # Create a cursor and insert the website URL into the database
+                cur = mysql.connection.cursor()
+
+                # Check if the website URL already exists for the user
+                cur.execute(
+                    "SELECT * FROM data_sources WHERE user_email = %s AND type = %s AND content = %s",
+                    (session['email'], 'website', website_url)
+                )
+                existing_website = cur.fetchone()
+                if existing_website:
+                    flash("This website URL has already been added.", "warning")
+                    cur.close()
+                    return redirect(url_for('add_link'))
+
+                # Insert the website URL record into the database
+                cur.execute(
+                    "INSERT INTO data_sources (user_email, type, content) VALUES (%s, %s, %s)",
+                    (session['email'], 'website', website_url)
+                )
+                mysql.connection.commit()
+                cur.close()
+
+                flash("Website URL added successfully", "success")
+
+    return redirect(url_for('manage_data_sources'))  # Redirect to home after adding the link
+
+
+@app.route('/manage_data_sources', methods=['GET', 'POST'])
+def manage_data_sources():
+    if 'email' not in session:
+        return redirect(url_for('login'))  # Redirect to login if not logged in
+
+    if request.method == 'POST':
+        # Handle file upload
+        if 'file' in request.files:
+            file = request.files['file']
+            if file.filename != '':
+                # Check if the file extension is allowed
+                if not allowed_file(file.filename):
+                    flash("Invalid file format. Allowed formats are: txt, pdf, png, jpg, jpeg, gif", "danger")
+                    return redirect(url_for('manage_data_sources'))
+
+                # Generate a unique file name to avoid overwriting files
+                file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+
+                # Check if the file already exists for the user (based on filename)
+                cur = mysql.connection.cursor()
+                cur.execute(
+                    "SELECT * FROM data_sources WHERE user_email = %s AND type = %s AND content = %s",
+                    (session['email'], 'file', file.filename)
+                )
+                existing_file = cur.fetchone()
+                if existing_file:
+                    flash("This file has already been uploaded.", "warning")
+                    cur.close()
+                    return redirect(url_for('manage_data_sources'))
+
+                # Save the file to the upload folder
+                file.save(file_path)
+
+                # Insert the file record into the database
+                cur.execute(
+                    "INSERT INTO data_sources (user_email, type, content) VALUES (%s, %s, %s)",
+                    (session['email'], 'file', file.filename)
+                )
+                mysql.connection.commit()
+                cur.close()
+
+                flash("File uploaded successfully", "success")
+
+        # Handle text data
+        elif 'text' in request.form:
+          text_data = request.form['text']
+          if text_data:
+        # Check if the text already exists for the logged-in user
+            cur = mysql.connection.cursor()
+            cur.execute(
+            "SELECT * FROM data_sources WHERE user_email = %s AND type = %s AND content = %s",
+            (session['email'], 'text', text_data)
+        )
+            existing_text = cur.fetchone()
+        
+          if existing_text:
+            flash("This text has already been added.", "warning")
+            cur.close()
+            return redirect(url_for('manage_data_sources'))
+          cur.execute(
+            "INSERT INTO data_sources (user_email, type, content) VALUES (%s, %s, %s)",
+            (session['email'], 'text', text_data)
+            )
+          mysql.connection.commit()
+          cur.close()
+
+          flash("Text data added successfully", "success")  # Redirect to the same page
+
+             # If the text doesn't exist, insert the new text into the database
+            
+        
+        
+        elif 'website' in request.form:
+             website_url = request.form['website']
+             if website_url:
+                # Insert the website URL record into the database
+                cur = mysql.connection.cursor()
+                cur.execute(
+                    "INSERT INTO data_sources (user_email, type, content) VALUES (%s, %s, %s)",
+                    (session['email'], 'website', website_url)
+                )
+                mysql.connection.commit()
+                cur.close()
+
+                flash("Website URL added successfully", "success")
+
+        # Handle Q&A
+        elif 'question' and 'answer' in request.form:
+            question = request.form['question']
+            answer = request.form['answer']
+            if question:
+                # Insert the question into the database
+                cur = mysql.connection.cursor()
+                cur.execute(
+                    "INSERT INTO questions_answers (user_email, question, answer) VALUES (%s, %s, %s)",
+                    (session['email'], question, answer)
+                )
+                mysql.connection.commit()
+                cur.close()
+
+                flash("Question and Answer submitted successfully.", "success")
+
+    # Fetch the user's data sources from the database (allow multiple files, text, website)
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT * FROM data_sources WHERE user_email = %s", (session['email'],))
+    data_sources = cur.fetchall()
+
+    # Fetch the user's questions from the database (allow multiple Q&As)
+    cur.execute("SELECT * FROM questions_answers WHERE user_email = %s", (session['email'],))
+    questions_answers = cur.fetchall()
+    cur.close()
+
+    return render_template('manage_data_sources.html', data_sources=data_sources, questions_answers=questions_answers)
+
+@app.route('/delete_item/<int:item_id>', methods=['POST'])
+def delete_item(item_id):
+    if 'email' not in session:
+        return redirect(url_for('login'))
+
+    # Delete the item from the database
+    cur = mysql.connection.cursor()
+    cur.execute("DELETE FROM data_sources WHERE id = %s AND user_email = %s", (item_id, session['email']))
+    mysql.connection.commit()
+    cur.close()
+
+    flash("Item deleted successfully!", "success")
+    return redirect(url_for('manage_data_sources'))
+
+@app.route('/sources', methods=['GET', 'POST'])
+def sources():
+    if 'email' not in session:
+        return redirect(url_for('login'))  # Redirect to login if not logged in
+    return render_template('sources.html', email=session['email'])
+
+@app.route('/playground', methods=['GET'])
+def playground():
+    if 'email' not in session:
+        return redirect(url_for('login'))  # Redirect to login if not logged in
+    return render_template('playground.html')
+
+
+@app.route('/settings', methods=['GET'])
+def settings():
+    if 'email' not in session:
+        flash("Please log in to access settings.", "error")
+        return redirect(url_for('login'))
+
+    try:
+        # Fetch user's teams from the database
+        with mysql.connection.cursor() as cur:
+            cur.execute("SELECT id, team_name, team_url FROM teams WHERE user_email = %s", (session['email'],))
+            teams = cur.fetchall()
+
+        # Flash a message if no teams are found
+        if not teams:
+            flash("You have not created any teams yet.", "info")
+
+        return render_template('settings.html', teams=teams)
+
+    except Exception as e:
+        # Log the error for debugging
+        print(f"Error fetching teams: {e}")
+        flash("An error occurred while fetching your teams. Please try again later.", "error")
+        return redirect(url_for('dashboard'))
+
+@app.route('/create-team', methods=['GET', 'POST'])
+def create_team():
+    if 'email' not in session:
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        team_name = request.form.get('team_name')
+        team_url = request.form.get('team_url')
+
+        if not team_name or not team_url:
+            flash("Team name and URL cannot be empty.", "danger")
+            return redirect(url_for('create_team'))
+
+        try:
+            cur = mysql.connection.cursor()
+            cur.execute(
+                "INSERT INTO teams (team_name, team_url, user_email) VALUES (%s, %s, %s)",
+                (team_name, team_url, session['email'])
+            )
+            mysql.connection.commit()
+            cur.close()
+
+            flash("Team created successfully!", "success")
+            return redirect(url_for('settings'))
+
+        except IntegrityError as e:
+            if e.args[0] == 1062:
+                flash("A team with this name already exists.", "danger")
+            else:
+                flash("An unexpected error occurred. Please try again.", "danger")
+            return redirect(url_for('create_team'))
+
+    return render_template('create_team.html')
+
+@app.route('/delete_team/<int:team_id>', methods=['GET', 'POST'])
+def delete_team(team_id):
+    if 'email' not in session:
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        cur = mysql.connection.cursor()
+        cur.execute("DELETE FROM teams WHERE id = %s AND user_email = %s", (team_id, session['email']))
+        mysql.connection.commit()
+        cur.close()
+
+        flash("Team deleted successfully!", "success")
+        return redirect(url_for('settings'))
+
+    # Render delete confirmation page
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT team_name FROM teams WHERE id = %s AND user_email = %s", (team_id, session['email']))
+    team = cur.fetchone()
+    cur.close()
+
+    if team:
+        return render_template('delete_team.html', team_name=team[0], team_id=team_id)
+    else:
+        flash("Team not found.", "danger")
+        return redirect(url_for('settings'))
+
+@app.route('/update_team/<int:team_id>', methods=['GET', 'POST'])
+def update_team(team_id):
+    if 'email' not in session:
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        team_name = request.form.get('team_name')
+        team_url = request.form.get('team_url')
+
+        if not team_name or not team_url:
+            flash("Team name and URL cannot be empty.", "danger")
+            return redirect(url_for('update_team', team_id=team_id))
+
+        cur = mysql.connection.cursor()
+        cur.execute(
+            "UPDATE teams SET team_name = %s, team_url = %s WHERE id = %s AND user_email = %s",
+            (team_name, team_url, team_id, session['email'])
+        )
+        mysql.connection.commit()
+        cur.close()
+
+        flash("Team updated successfully!", "success")
+        return redirect(url_for('settings'))
+
+    # Render update form
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT team_name, team_url FROM teams WHERE id = %s AND user_email = %s", (team_id, session['email']))
+    team = cur.fetchone()
+    cur.close()
+
+    if team:
+        return render_template('update_team.html', team_name=team[0], team_url=team[1], team_id=team_id)
+    else:
+        flash("Team not found.", "danger")
+        return redirect(url_for('settings'))
+
+@app.route('/chatbot', methods=['GET', 'POST'])
+def chatbot():
+    if 'email' not in session:
+        return redirect(url_for('login'))  # Redirect to login if not logged in
+
+    bot_response = None  # Initialize bot_response
+
+    if request.method == 'POST':
+        user_message = request.form['user_message']  # Get the user message from the form
+        if user_message:
+            # Call the Cohere API
+            response = requests.post(
+                'https://api.cohere.ai/generate',  # Cohere API endpoint
+                json={
+                    'model': 'command-xlarge-nightly',  # Specify the model
+                    'prompt': user_message,
+                    'max_tokens': 1000,  # Adjust the number of tokens as needed
+                    'temperature': 0.5  # Adjust the temperature for creativity
+                },
+                headers={
+                    'Authorization': f'Bearer IULk3F4tKe5leRiy5vleECcR0zl6wwABpnxtKB9b',  # Replace with your actual API key
+                    'Content-Type': 'application/json'
+                }
+            )
+
+            if response.status_code == 200:
+                response_data = response.json()
+                # print(response_data)  # Print the full response for debugging
+                bot_response = response_data.get('text', 'No response available')
+            else:
+                # print(f"Error: {response.status_code}, Response: {response.text}")
+                bot_response = 'Error communicating with the chatbot service.'
+
+        else:
+            bot_response = 'Please enter a message.'
+
+    return render_template('chatbot.html', email=session['email'], bot_response=bot_response)
+
+
+if __name__ == '__main__':
+    app.run(debug=True, port=7000)

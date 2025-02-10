@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="stylesheet" href="/static/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sources</title>
+    <link rel="stylesheet" href="/static/style.css"> <!-- Custom CSS -->
+    <style>
+        /* Global Styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Main container */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 50px 20px;
+        }
+
+        /* Chatbot section */
+        .chatbot-container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            text-align: center;
+        }
+
+        .chatbot-container h1 {
+            font-size: 2.5rem;
+            color: #000000;
+            margin-bottom: 30px;
+        }
+
+        .chatbot-container p {
+            font-size: 1.1rem;
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        .chatbot-btn {
+            display: inline-block;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            margin: 10px 0;
+            background-color: #000000;
+            color: white;
+            text-align: center;
+        }
+
+        .chatbot-btn:hover {
+            background-color: #333333;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            font-size: 1rem;
+            color: #333;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .back-link:hover {
+            color: #000000;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px 15px;
+            }
+
+            .chatbot-btn {
+                width: 100%;
+                padding: 12px 20px;
+            }
+
+            .back-link {
+                display: block;
+                text-align: center;
+                margin-top: 30px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="chatbot-container">
+            <h1>Welcome to the Chatbot</h1>
+            <p>Start chatting here and explore what the chatbot can do!</p>
+            <a href="{{ url_for('manage_data_sources') }}" class="chatbot-btn">Data Sources</a>
+            <p><a href="{{ url_for('home') }}" class="back-link">Back to Home</a></p>
+        </div>
+    </div>
+
+</body>
+
+</html>

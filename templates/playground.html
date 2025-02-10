@@ -1,0 +1,107 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbase Clone</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #ffffff; /* White background */
+            color: #000000; /* Black text */
+        }
+        .header {
+            background-color: #ffffff; /* White header */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .nav-link {
+            transition: color 0.3s;
+        }
+        .nav-link:hover {
+            color: #000000; /* Black on hover */
+        }
+        .chat-box {
+            background-color: #ffffff; /* White chat box */
+            border: 1px solid #000000; /* Black border */
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            width: 100%; /* Full width */
+            max-width: 800px; /* Increased max width */
+            height: 400px; /* Increased height */
+            padding: 20px; /* Increased padding */
+        }
+        .input-area {
+            border-top: 1px solid #000000; /* Black border */
+            padding: 10px; /* Adjusted padding */
+            display: flex;
+            align-items: center;
+        }
+        .input-area input {
+            border: 1px solid #000000; /* Black border */
+            outline: none;
+            flex: 1;
+            padding: 10px;
+            border-radius: 4px;
+            margin-right: 10px;
+            background-color: #f1f1f1; /* Light gray background for input */
+        }
+        .input-area button {
+            background-color: #000000; /* Black button */
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 15px;
+            cursor: pointer;
+        }
+        .input-area button:hover {
+            background-color: #333333; /* Darker black on hover */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-900">
+    <div class="header flex items-center justify-between p-4">
+        <div class="flex items-center space-x-2">
+            <div class="bg-black text-white rounded-full w-8 h-8 flex items-center justify-center">
+                <span class="text-xl font-bold">C</span>
+            </div>
+        </div>
+        <!-- <div class="flex items-center space-x-4">
+            <div class="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center"></div>
+        </div> -->
+    </div>
+    <div class="flex justify-center mt-4">
+        <div class="w-full max-w-6xl">
+            <div class="flex items-center space-x-8 border-b border-gray-200">
+                <a href="#" class="py-2 px-4 text-gray-900 border-b-2 border-purple-500 nav-link">Playground</a>
+            </div>
+            <div class="flex justify-center mt-4">
+                <div class="chat-box">
+                    <div class="flex justify-between items-center">
+                        <i class="fas fa-sync-alt text-gray-500"></i>
+                    </div>
+                    <div class="mt-4">
+                        <div class="bg-gray-100 text-gray -700 p-2 rounded-lg">
+                            Hi! What can I help you with?
+                        </div>
+                    </div>
+                    <div class="input-area mt-4">
+                        <input type="text" placeholder="Message..." class="border border-gray-300 rounded-lg p-2">
+                        <button class="ml-2 text-gray-500">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                    <div class="mt-4 text-center text-gray-500 text-sm">
+                        <span>Powered By Chatbase.co</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="fixed bottom-4 right-4">
+        <button class="bg-black text-white rounded-full w-12 h-12 flex items-center justify-center">
+            <i class="fas fa-comment-alt"></i>
+        </button>
+    </div>
+</body>
+</html>

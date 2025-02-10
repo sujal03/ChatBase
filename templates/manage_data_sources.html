@@ -1,0 +1,430 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Sources</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .container-fluid {
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: 250px;
+            color: #000;
+            padding-top: 150px;
+            position: fixed;
+            height: 100%;
+            padding-left: 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar h3 {
+            color: #000;
+            margin-bottom: 30px;
+            font-size: 1.5rem;
+            text-align: center;
+            /* Center the sidebar title */
+        }
+
+        .sidebar .nav-link {
+            color: #000 !important;
+            padding: 15px;
+            font-size: 1.2rem;
+            text-decoration: none;
+            display: block;
+        }
+
+        .main-content {
+            margin-left: 250px;
+            padding: 30px;
+            flex-grow: 1;
+            background-color: #fff;
+            color: #333;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: #333;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        .form-section {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border: 1px solid #ddd;
+        }
+
+        .form-control {
+            border-radius: 8px;
+            padding: 14px;
+            border: 1px solid #ddd;
+            width: 100%;
+            font-size: 1rem;
+            margin-bottom: 20px;
+        }
+
+        .form-control:focus {
+            border-color: #000;
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+        }
+
+        h2 {
+            margin-bottom: 20px;
+        }
+
+        .btn,
+        .back-btn a,
+        .main-content .btn {
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: #fff;
+            width: 200px;
+            display: inline-block;
+            padding: 5px 0;
+            border: 1px solid #000;
+            border-radius: 5px;
+            background-color: #000;
+            transition: all 0.3s ease;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .btn:hover,
+        .back-btn a:hover,
+        .main-content .btn:hover {
+            background-color: #333;
+            color: #fff;
+        }
+
+        .list-group-item {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .list-group-item:hover {
+            background-color: #f1f1f1;
+        }
+
+        .list-group-item span {
+            font-size: 1rem;
+            color: #333;
+        }
+
+        .list-group-item .badge {
+            background-color: #000;
+        }
+
+        .back-btn {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .flash-messages {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            text-align: center;
+            width: 50%;
+            padding: 15px;
+            border-radius: 10px;
+            background-color: transparent;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            font-weight: bold;
+            /* Makes all headings bold */
+        }
+
+        .flash-messages .alert {
+            margin-bottom: 10px;
+            font-size: 1rem;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid;
+        }
+
+        .flash-messages .alert-success {
+            background-color: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+
+        .flash-messages .alert-danger {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+
+        .button-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            gap: 10px;
+        }
+
+        .button-container .btn {
+            width: 120px;
+        }
+
+        .sources-box {
+            position: absolute;
+            top: 200px;
+            /* Align with the top padding of the main content */
+            right: 30px;
+            /* Adjust as needed for spacing from the right */
+            width: 500px;
+            /* Set a width similar to the sidebar */
+            background-color: #fff;
+            /* Optional: background color */
+            padding: 20px;
+            /* Optional: padding for aesthetics */
+            border-radius: 10px;
+            /* Optional: rounded corners */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            /* Optional: shadow for depth */
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <!-- Flash Message Block -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="flash-messages">
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <!-- Simplified Sidebar -->
+        <div class="sidebar">
+            <h3>Chatbase</h3>
+            <nav>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#" onclick="showTab('files')">
+                            <i class="bi bi-file-earmark" style="font-size: 1.2rem; margin-right: 10px;"></i> Files
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showTab('text')">
+                            <i class="bi bi-pencil" style="font-size: 1.2rem; margin-right: 10px;"></i> Text
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showTab('website')">
+                            <i class="bi bi-link" style="font-size: 1.2rem; margin-right: 10px;"></i> Website
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showTab('qna')">
+                            <i class="bi bi-question-circle" style="font-size: 1.2rem; margin-right: 10px;"></i> Q&A
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <h1>Data Sources</h1>
+
+            <!-- Content Sections -->
+            <div class="row">
+                <!-- Files Section -->
+                <div class="col-md-6 content-section files-section active" id="files">
+                    <div class="form-section">
+                        <h2>Upload File</h2>
+                        <form method="POST" enctype="multipart/form-data">
+                            <input type="file" name="file" class="form-control mb-3">
+                            <button type="submit" class="btn">Upload</button>
+                        </form>
+
+                        <h3>Uploaded Files</h3>
+                        <ul class="list-group-item">
+                            {% for file in data_sources %}
+                            {% if file.type == 'file' %}
+                            <li class="list-group">
+                                <form action="{{ url_for('delete_item', item_id=item[0]) }}" method="POST"
+                                    style="display:inline;">
+                                    <button type="submit">Delete</button>
+                                </form>
+                                <span>{{ file.content }}</span>
+                                <a href="{{ url_for('static', filename='uploads/' + file.content) }}" target="_blank"
+                                    class="badge">View</a>
+                            </li>
+                            {% endif %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Text Section -->
+                <div class="col-md-6 content-section text-section" id="text">
+                    <div class="form-section">
+                        <h2>Add Text</h2>
+                        <form method="POST">
+                            <textarea name="text" class="form-control" placeholder="Enter your text here"
+                                rows="4"></textarea>
+                            <button type="submit" class="btn mt-3">Add Text</button>
+                        </form>
+
+                        <h3 class="mt-4">Your Text Entries</h3>
+                        <ul class="list-group">
+                            {% for text in data_sources %}
+                            {% if text.type == 'text' %}
+                            <li class="list-group-item">{{ text.content }}</li>
+                            {% endif %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Website Section -->
+                <div class="col-md-6 content-section website-section" id="website">
+                    <div class="form-section">
+                        <h2>Crawl</h2>
+                        <form method="POST" action="/add_link">
+                            <input type="url" class="form-control mb-3" placeholder="https://www.example.com"
+                                name="website_url" required>
+                            <button type="submit" class="btn mt-2">Fetch Links</button>
+                        </form>
+
+                        <div class="mt-4">
+                            <h2>Submit Sitemap</h2>
+                            <input type="url" class="form-control mb-3"
+                                placeholder="https://www.example.com/sitemap.xml">
+                            <button class="btn mt-2">Load Sitemap</button>
+                        </div>
+
+                        <h3>Included Links</h3>
+                        <ul class="list-group">
+                            {% for source in data_sources %}
+                            {% if source.type == 'website' %}
+                            <li class="list-group-item">
+                                <a href="{{ source.content }}" target="_blank">{{ source.content }}</a>
+                            </li>
+                            {% endif %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Q&A Section -->
+                <div class="col-md-6 content-section qna-section" id="qna">
+                    <div class="form-section">
+                        <h2>Add Question and Answer</h2>
+                        <form method="POST">
+                            <div class="mb-3">
+                                <input type="text" name="question" class="form-control" placeholder="Enter Question"
+                                    required>
+                            </div>
+                            <div class="mb-3">
+                                <input type="text" name="answer" class="form-control" placeholder="Enter Answer"
+                                    required>
+                            </div>
+                            <button type="submit" class="btn">Add Q&A</button>
+                        </form>
+
+                        <h3>Your Q&A Entries</h3>
+                        <ul class="list-group">
+                            {% for question in questions_answers %}
+                            <li class="list-group-item">
+                                <strong>{{ question }}</strong>
+                                <span>{{ answer }}</span>
+                                <form action="{{ url_for('delete_item', item_id=question[0]) }}" method="POST"
+                                    style="display:inline;">
+                                    <button type="submit">Delete</button>
+                                </form>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Back Button -->
+            <div class="text-center mt-5">
+                <a href="{{ url_for('home') }}" class="btn">Back to Home</a>
+                <a href="{{ url_for('manage_data_sources') }}" class="btn">Refresh</a>
+            </div>
+        </div>
+
+        <!-- Create Chatbot Button (Positioned to Upper-Right) -->
+        <div class="position-absolute middle-right p-4 sources-box">
+            <h5>Sources</h5>
+            <p>Total Detected Characters: 0 / 400,000 limit</p>
+            <button class="btn" onclick="redirectToChatbot()">Create Chatbot</button>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+
+    <script>
+        // Show the active tab
+        function showTab(tabName) {
+            const tabs = document.querySelectorAll('.content-section');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        function redirectToChatbot() {
+            window.location.href = "/chatbot";
+        }
+    </script>
+</body>
+
+</html>

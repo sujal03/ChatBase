@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Team</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f9f9f9;
+        }
+
+        .dropdown-menu {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .form-container {
+            width: 100%;
+            max-width: 400px;
+            margin: auto;
+            padding: 20px;
+            background: white;
+            border: 1px solid #eaeaea;
+            border-radius: 8px;
+        }
+
+        .form-label {
+            font-weight: bold;
+        }
+
+        .btn-primary {
+            background-color: black;
+            border-color: black;
+        }
+
+        .btn-primary:hover {
+            background-color: #333333;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="row py-3">
+            <!-- Flash Message Block -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                <div class="alert {{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% endwith %}
+            <!-- Dropdown for Teams -->
+            <div class="col-12 d-flex justify-content-between align-items-center">
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="teamDropdown"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                        Select Team
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="teamDropdown">
+                        <!-- <li><a class="dropdown-item" href="#">Team 1</a></li>
+                        <li><a class="dropdown-item" href="#">Team 2</a></li>
+                        <li><a class="dropdown-item" href="#">Team 3</a></li> -->
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li><a class="dropdown-item text-primary" href="#createTeamModal" data-bs-toggle="modal">+
+                                Create Team</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Team Creation Form -->
+        <div class="form-container mt-5">
+            <h4 class="text-center">Create Team</h4>
+            <p class="text-muted text-center">This is your team's visible name within Chatbase.</p>
+            <form>
+                <div class="mb-3">
+                    <label for="teamName" class="form-label">Team Name</label>
+                    <input type="text" class="form-control" id="teamName" placeholder="Name of your team" required>
+                </div>
+                <div class="mb-3">
+                    <label for="teamURL" class="form-label">Team URL</label>
+                    <input type="text" class="form-control" id="teamURL" placeholder="URL of your team" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Create</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
