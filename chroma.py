@@ -3,21 +3,21 @@ import logging
 from pathlib import Path
 from dotenv import load_dotenv
 
-# LangChain imports
+# LangChain and ChromaDB imports
 from langchain_community.document_loaders import PDFPlumberLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_chroma import Chroma
 from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI
 from langchain_core.prompts import ChatPromptTemplate
+from langchain.docstore.document import Document
 
 load_dotenv()
 
 # ---------------------------
 # Configuration
 # ---------------------------
-PDF_DIR = "uploads/"  # Directory for PDFs (or other documents)
-CHROMA_PERSIST_DIR = "./chroma_db"  # Persistent directory for ChromaDB
-BATCH_SIZE = 5461  # (Optional: if using batching)
+PDF_DIR = "uploads/"
+CHROMA_PERSIST_DIR = "./chroma_db"
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 
@@ -64,7 +64,6 @@ def index_to_chroma(chunks):
     """
     Index document chunks into ChromaDB.
     """
-    # Note: You can instantiate embeddings without API keys if only indexing PDFs.
     embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
     vectordb = Chroma(
         collection_name="documents",
@@ -76,6 +75,10 @@ def index_to_chroma(chunks):
     return vectordb
 
 def create_and_index_embeddings():
+    """
+    Load PDFs from the PDF_DIR, split them into chunks, and index them into ChromaDB.
+    After indexing, delete the processed PDF files.
+    """
     os.makedirs(PDF_DIR, exist_ok=True)
     os.makedirs(CHROMA_PERSIST_DIR, exist_ok=True)
     
@@ -89,19 +92,18 @@ def create_and_index_embeddings():
     chunks = process_documents(raw_docs)
     
     logging.info("📥 Indexing document chunks to ChromaDB...")
-    vectordb = index_to_chroma(chunks)
+    vectordb_local = index_to_chroma(chunks)
     logging.info(f"✅ Successfully indexed {len(chunks)} chunk(s) to ChromaDB")
     
-    # Delete each PDF file after indexing
+    # Delete PDFs after indexing
     for pdf_path in Path(PDF_DIR).glob('*.pdf'):
         try:
-            pdf_path.unlink()  # Delete the file
+            pdf_path.unlink()
             logging.info(f"🗑️ Deleted file: {pdf_path.name}")
         except Exception as e:
             logging.error(f"❌ Failed to delete file {pdf_path.name}: {e}")
     
-    return vectordb
-
+    return vectordb_local
 
 # ---------------------------
 # Components for RAG & Chatbot
@@ -131,10 +133,11 @@ def init_components():
     )
     return vectordb, embeddings, llm
 
-# Initialize components globally (for instance, in your chatbot application)
 vectordb, embeddings, llm = init_components()
 
+# ---------------------------
 # RAG Prompt Templates
+# ---------------------------
 PROMPT_TEMPLATE = """
 You are an AI assistant helping users extract information from documents.
 Use only the provided context to answer questions.
@@ -149,11 +152,14 @@ User Question:
 - Be clear and concise.
 - Use points for structured answers.
 - Avoid assumptions or fabrications.
+- Provide accurate and relevant information.
+- If the answer is not in the context, you can say "The answer is not in the document."
+- don't mention the document or the context in the answer.
 """
 
 FALLBACK_PROMPT = """
-You are an AI assistant specializing in General purpose helping Assistant.
-Since there is no relevant document-based context, answer the question using your knowlege base.
+You are an AI assistant specializing in general purpose assistance.
+Since there is no relevant document-based context, answer the question using your knowledge base.
 
 User Question:
 {question}
@@ -167,26 +173,18 @@ User Question:
 prompt = ChatPromptTemplate.from_template(PROMPT_TEMPLATE)
 fallback_prompt = ChatPromptTemplate.from_template(FALLBACK_PROMPT)
 
-def search_documents(user_query, vectordb, embeddings, k=5, threshold=0.5):
-    """
-    Generate an embedding for the user query and perform a semantic search in ChromaDB.
-    Only return documents with a similarity score below the given threshold.
-    """
+def search_documents(user_query, vectordb, embeddings, k=5, threshold=0.8):
     results = vectordb.similarity_search_with_score(user_query, k=k)
     relevant_docs = [doc[0] for doc in results if doc[1] < threshold]
     return relevant_docs
 
-def generate_llm_response(user_query, vectordb, llm):
-    """
-    Retrieve relevant documents from ChromaDB and generate a response using the Gemini LLM.
-    """
-    relevant_docs = search_documents(user_query, vectordb, embeddings)
-    context = "\n\n".join(doc.page_content for doc in relevant_docs) if relevant_docs else ""
-    # Here you can decide which prompt to use; below we always use the main prompt.
-    final_prompt = prompt
+def generate_llm_response(user_query, vectordb, llm, threshold=0.8):
+    relevant_docs = search_documents(user_query, vectordb, embeddings, threshold=threshold)
+
+    context = "\n\n".join(doc.page_content for doc in relevant_docs) 
+    final_prompt = prompt  # Optionally use fallback_prompt if context is empty
     prompt_data = {"context": context, "question": user_query}
-    
-    # Pipe the prompt into the LLM
+
     chain = final_prompt | llm
     response_chunks = []
     for chunk in chain.stream(prompt_data):
@@ -194,17 +192,47 @@ def generate_llm_response(user_query, vectordb, llm):
     return "".join(response_chunks)
 
 # ---------------------------
+# New Function: Add Q&A Input to Vector Database for RAG
+# ---------------------------
+def add_qa_to_vector_database(question: str, answer: str):
+    qa_content = f"Question: {question}\nAnswer: {answer}"
+    doc = Document(page_content=qa_content, metadata={"source": "user_qa"})
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=400, chunk_overlap=100)
+    docs = text_splitter.split_documents([doc])
+    vectordb.add_documents(docs)
+    logging.info("✅ Q&A pair successfully indexed into the vector database.")
+
+# ---------------------------
+# Existing Function: Add Text Input to Vector Database for RAG
+# ---------------------------
+def add_text_to_vector_database(text_data: str):
+    doc = Document(page_content=text_data, metadata={"source": "user_text_input"})
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=400, chunk_overlap=100)
+    docs = text_splitter.split_documents([doc])
+    vectordb.add_documents(docs)
+    logging.info("✅ User text successfully indexed into the vector database.")
+
+# ---------------------------
 # Optional: Testing when run as a script
 # ---------------------------
 if __name__ == "__main__":
-    # Test indexing
+    # Test PDF indexing and deletion
     vectordb_from_indexing = create_and_index_embeddings()
     if vectordb_from_indexing:
         test_query = "Your detailed search query here"
         results = search_documents(test_query, vectordb_from_indexing, embeddings)
         for idx, doc in enumerate(results, start=1):
-            logging.info(f"Result {idx}: {doc.page_content[:100]}...")  # Show first 100 characters
+            logging.info(f"Result {idx}: {doc.page_content[:100]}...")
 
     # Test LLM response
     response = generate_llm_response("Tell me about the document.", vectordb, llm)
     logging.info(f"LLM Response: {response}")
+
+    # Test indexing text input for RAG
+    sample_text = "This is a sample text input for testing retrieval augmented generation."
+    add_text_to_vector_database(sample_text)
+
+    # Test indexing Q&A input for RAG
+    sample_question = "What is the capital of France?"
+    sample_answer = "The capital of France is Paris."
+    add_qa_to_vector_database(sample_question, sample_answer)

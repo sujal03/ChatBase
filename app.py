@@ -1,35 +1,38 @@
+import os
+import requests
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 from flask_mysqldb import MySQL
 from werkzeug.security import generate_password_hash, check_password_hash
-import os
 from MySQLdb import IntegrityError
-import requests
 
-from chroma import create_and_index_embeddings, generate_llm_response, vectordb, llm
+#  ChromaDB imports
+from chroma import create_and_index_embeddings, generate_llm_response, vectordb, llm, add_text_to_vector_database, add_qa_to_vector_database
 
-from langchain_chroma import Chroma
-from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI
-from langchain_core.prompts import ChatPromptTemplate
 
+# Flask App Initialization
 app = Flask(__name__)
 app.secret_key = 'secret-key'
 
-# MySQL Config
+# MySQL Configuration
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PORT']  = 3306
+app.config['MYSQL_PORT'] = 3306
 app.config['MYSQL_PASSWORD'] = 'Root@123'
 app.config['MYSQL_DB'] = 'UserAuthDB'
+
+# Upload Folder Configuration
 UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
 
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-
+# Initialize MySQL
 mysql = MySQL(app)
+
+# Utility Function: Check Allowed File Types
+def allowed_file(filename):
+    """Check if the uploaded file has an allowed extension."""
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # File Upload Config
 app.config['UPLOAD_FOLDER'] = 'uploads'
@@ -184,38 +187,28 @@ def add_link():
 
 @app.route('/manage_data_sources', methods=['GET', 'POST'])
 def manage_data_sources():
+    """Manage user data sources: files, text, websites, and Q&A."""
+
     if 'email' not in session:
         return redirect(url_for('login'))  # Redirect to login if not logged in
 
     if request.method == 'POST':
-        # Handle file upload
+
+        # ✅ Handle File Upload
         if 'file' in request.files:
             file = request.files['file']
             if file.filename != '':
-                # Check if the file extension is allowed
                 if not allowed_file(file.filename):
                     flash("Invalid file format. Allowed formats are: txt, pdf, png, jpg, jpeg, gif", "danger")
                     return redirect(url_for('manage_data_sources'))
 
-                # Generate a unique file name to avoid overwriting files
                 file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
-
-                # Check if the file already exists for the user (based on filename)
-                # cur = mysql.connection.cursor()
-                # cur.execute(
-                #     "SELECT * FROM data_sources WHERE user_email = %s AND type = %s AND content = %s",
-                #     (session['email'], 'file', file.filename)
-                # )
-                # existing_file = cur.fetchone()
-                # if existing_file:
-                #     flash("This file has already been uploaded.", "warning")
-                #     cur.close()
-                #     return redirect(url_for('manage_data_sources'))
 
                 # Save the file to the upload folder
                 file.save(file_path)
 
-                # Insert the file record into the database
+                # 🔹 Add file record to the database (Commented Out)
+                # cur = mysql.connection.cursor()
                 # cur.execute(
                 #     "INSERT INTO data_sources (user_email, type, content) VALUES (%s, %s, %s)",
                 #     (session['email'], 'file', file.filename)
@@ -224,43 +217,44 @@ def manage_data_sources():
                 # cur.close()
 
                 flash("File uploaded successfully", "success")
-                create_and_index_embeddings()
 
+                # Generate embeddings for uploaded file
+                create_and_index_embeddings()
                 flash("Embeddings created and indexed successfully", "success")
 
-        # Handle text data
+        # ✅ Handle Text Data Submission
         elif 'text' in request.form:
-          text_data = request.form['text']
-          if text_data:
-        # Check if the text already exists for the logged-in user
-            cur = mysql.connection.cursor()
-            cur.execute(
-            "SELECT * FROM data_sources WHERE user_email = %s AND type = %s AND content = %s",
-            (session['email'], 'text', text_data)
-        )
-            existing_text = cur.fetchone()
-        
-          if existing_text:
-            flash("This text has already been added.", "warning")
-            cur.close()
-            return redirect(url_for('manage_data_sources'))
-          cur.execute(
-            "INSERT INTO data_sources (user_email, type, content) VALUES (%s, %s, %s)",
-            (session['email'], 'text', text_data)
-            )
-          mysql.connection.commit()
-          cur.close()
+            text_data = request.form['text']
+            if text_data:
+                # Check if the text already exists in the database
+                # cur = mysql.connection.cursor()
+                # cur.execute(
+                #     "SELECT * FROM data_sources WHERE user_email = %s AND type = %s AND content = %s",
+                #     (session['email'], 'text', text_data)
+                # )
+                # existing_text = cur.fetchone()
 
-          flash("Text data added successfully", "success")  # Redirect to the same page
+                # if existing_text:
+                #     flash("This text has already been added.", "warning")
+                #     cur.close()
+                #     return redirect(url_for('manage_data_sources'))
 
-             # If the text doesn't exist, insert the new text into the database
-            
-        
-        
+                # # Insert new text data
+                # cur.execute(
+                #     "INSERT INTO data_sources (user_email, type, content) VALUES (%s, %s, %s)",
+                #     (session['email'], 'text', text_data)
+                # )
+                # mysql.connection.commit() 
+                # cur.close()
+                
+                add_text_to_vector_database(text_data)
+                flash("Text data added successfully", "success")
+
+        # ✅ Handle Website URL Submission
         elif 'website' in request.form:
-             website_url = request.form['website']
-             if website_url:
-                # Insert the website URL record into the database
+            website_url = request.form['website']
+            if website_url:
+                # 🔹 Add website URL to the database (Commented Out)
                 # cur = mysql.connection.cursor()
                 # cur.execute(
                 #     "INSERT INTO data_sources (user_email, type, content) VALUES (%s, %s, %s)",
@@ -271,12 +265,12 @@ def manage_data_sources():
 
                 flash("Website URL added successfully", "success")
 
-        # Handle Q&A
-        elif 'question' and 'answer' in request.form:
+        # ✅ Handle Q&A Submission
+        elif 'question' in request.form and 'answer' in request.form:
             question = request.form['question']
             answer = request.form['answer']
             if question:
-                # Insert the question into the database
+                # 🔹 Add Q&A to the database (Commented Out)
                 # cur = mysql.connection.cursor()
                 # cur.execute(
                 #     "INSERT INTO questions_answers (user_email, question, answer) VALUES (%s, %s, %s)",
@@ -285,16 +279,20 @@ def manage_data_sources():
                 # mysql.connection.commit()
                 # cur.close()
 
+                add_qa_to_vector_database(question, answer)
                 flash("Question and Answer submitted successfully.", "success")
 
-    # Fetch the user's data sources from the database (allow multiple files, text, website)
+    # ✅ Fetch User Data from Database
     cur = mysql.connection.cursor()
+
+    # 🔹 Fetch uploaded files, text data, and websites
     cur.execute("SELECT * FROM data_sources WHERE user_email = %s", (session['email'],))
     data_sources = cur.fetchall()
 
-    # Fetch the user's questions from the database (allow multiple Q&As)
+    # 🔹 Fetch user-submitted Q&A
     cur.execute("SELECT * FROM questions_answers WHERE user_email = %s", (session['email'],))
     questions_answers = cur.fetchall()
+
     cur.close()
 
     return render_template('manage_data_sources.html', data_sources=data_sources, questions_answers=questions_answers)
