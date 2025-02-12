@@ -1,13 +1,18 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 from flask_mysqldb import MySQL
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
 from MySQLdb import IntegrityError
 import requests
 
+from chroma import create_and_index_embeddings, generate_llm_response, vectordb, llm
+
+from langchain_chroma import Chroma
+from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI
+from langchain_core.prompts import ChatPromptTemplate
 
 app = Flask(__name__)
-app.secret_key = 'x2f4'
+app.secret_key = 'secret-key'
 
 # MySQL Config
 app.config['MYSQL_HOST'] = 'localhost'
@@ -68,7 +73,6 @@ def register():
 
     return render_template('register.html')
 
-
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -87,7 +91,6 @@ def login():
         else:
             flash("Invalid credentials", "danger")
     return render_template('login.html')
-
 
 @app.route('/logout')
 def logout():
@@ -179,7 +182,6 @@ def add_link():
 
     return redirect(url_for('manage_data_sources'))  # Redirect to home after adding the link
 
-
 @app.route('/manage_data_sources', methods=['GET', 'POST'])
 def manage_data_sources():
     if 'email' not in session:
@@ -199,29 +201,32 @@ def manage_data_sources():
                 file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
 
                 # Check if the file already exists for the user (based on filename)
-                cur = mysql.connection.cursor()
-                cur.execute(
-                    "SELECT * FROM data_sources WHERE user_email = %s AND type = %s AND content = %s",
-                    (session['email'], 'file', file.filename)
-                )
-                existing_file = cur.fetchone()
-                if existing_file:
-                    flash("This file has already been uploaded.", "warning")
-                    cur.close()
-                    return redirect(url_for('manage_data_sources'))
+                # cur = mysql.connection.cursor()
+                # cur.execute(
+                #     "SELECT * FROM data_sources WHERE user_email = %s AND type = %s AND content = %s",
+                #     (session['email'], 'file', file.filename)
+                # )
+                # existing_file = cur.fetchone()
+                # if existing_file:
+                #     flash("This file has already been uploaded.", "warning")
+                #     cur.close()
+                #     return redirect(url_for('manage_data_sources'))
 
                 # Save the file to the upload folder
                 file.save(file_path)
 
                 # Insert the file record into the database
-                cur.execute(
-                    "INSERT INTO data_sources (user_email, type, content) VALUES (%s, %s, %s)",
-                    (session['email'], 'file', file.filename)
-                )
-                mysql.connection.commit()
-                cur.close()
+                # cur.execute(
+                #     "INSERT INTO data_sources (user_email, type, content) VALUES (%s, %s, %s)",
+                #     (session['email'], 'file', file.filename)
+                # )
+                # mysql.connection.commit()
+                # cur.close()
 
                 flash("File uploaded successfully", "success")
+                create_and_index_embeddings()
+
+                flash("Embeddings created and indexed successfully", "success")
 
         # Handle text data
         elif 'text' in request.form:
@@ -256,13 +261,13 @@ def manage_data_sources():
              website_url = request.form['website']
              if website_url:
                 # Insert the website URL record into the database
-                cur = mysql.connection.cursor()
-                cur.execute(
-                    "INSERT INTO data_sources (user_email, type, content) VALUES (%s, %s, %s)",
-                    (session['email'], 'website', website_url)
-                )
-                mysql.connection.commit()
-                cur.close()
+                # cur = mysql.connection.cursor()
+                # cur.execute(
+                #     "INSERT INTO data_sources (user_email, type, content) VALUES (%s, %s, %s)",
+                #     (session['email'], 'website', website_url)
+                # )
+                # mysql.connection.commit()
+                # cur.close()
 
                 flash("Website URL added successfully", "success")
 
@@ -272,13 +277,13 @@ def manage_data_sources():
             answer = request.form['answer']
             if question:
                 # Insert the question into the database
-                cur = mysql.connection.cursor()
-                cur.execute(
-                    "INSERT INTO questions_answers (user_email, question, answer) VALUES (%s, %s, %s)",
-                    (session['email'], question, answer)
-                )
-                mysql.connection.commit()
-                cur.close()
+                # cur = mysql.connection.cursor()
+                # cur.execute(
+                #     "INSERT INTO questions_answers (user_email, question, answer) VALUES (%s, %s, %s)",
+                #     (session['email'], question, answer)
+                # )
+                # mysql.connection.commit()
+                # cur.close()
 
                 flash("Question and Answer submitted successfully.", "success")
 
@@ -319,7 +324,6 @@ def playground():
     if 'email' not in session:
         return redirect(url_for('login'))  # Redirect to login if not logged in
     return render_template('playground.html')
-
 
 @app.route('/settings', methods=['GET'])
 def settings():
@@ -446,39 +450,28 @@ def chatbot():
     if 'email' not in session:
         return redirect(url_for('login'))  # Redirect to login if not logged in
 
-    bot_response = None  # Initialize bot_response
+    bot_response = ""
+    user_message = ""
 
     if request.method == 'POST':
-        user_message = request.form['user_message']  # Get the user message from the form
+        user_message = request.form['user_message']
+
         if user_message:
-            # Call the Cohere API
-            response = requests.post(
-                'https://api.cohere.ai/generate',  # Cohere API endpoint
-                json={
-                    'model': 'command-xlarge-nightly',  # Specify the model
-                    'prompt': user_message,
-                    'max_tokens': 1000,  # Adjust the number of tokens as needed
-                    'temperature': 0.5  # Adjust the temperature for creativity
-                },
-                headers={
-                    'Authorization': f'Bearer IULk3F4tKe5leRiy5vleECcR0zl6wwABpnxtKB9b',  # Replace with your actual API key
-                    'Content-Type': 'application/json'
-                }
-            )
-
-            if response.status_code == 200:
-                response_data = response.json()
-                # print(response_data)  # Print the full response for debugging
-                bot_response = response_data.get('text', 'No response available')
-            else:
-                # print(f"Error: {response.status_code}, Response: {response.text}")
-                bot_response = 'Error communicating with the chatbot service.'
-
+            bot_response = generate_llm_response(user_message, vectordb, llm)
         else:
-            bot_response = 'Please enter a message.'
+            bot_response = "Please enter a message."
 
-    return render_template('chatbot.html', email=session['email'], bot_response=bot_response)
+        # ✅ Return JSON response for AJAX requests
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+            return jsonify({"bot_response": bot_response})
+
+    # Regular page render for direct GET requests
+    return render_template('chatbot.html', email=session['email'], user_message=user_message, bot_response=bot_response)
 
 
 if __name__ == '__main__':
     app.run(debug=True, port=7000)
+
+
+
+    
