@@ -1,430 +1,519 @@
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data Sources</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
-    <!-- Font Awesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Data Sources</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <!-- Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+  <!-- Inter Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --primary-color: #3182ce;
+      --secondary-color: #2b6cb0;
+      --bg-color: #f9fafb;
+      --card-bg: #ffffff;
+      --border-color: rgba(0, 0, 0, 0.1);
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      --hover-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+      --neutral-gray: #6c757d;
+    }
 
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f8f9fa;
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--neutral-gray);
+      margin: 0;
+      padding: 0;
+    }
 
-        .container-fluid {
-            display: flex;
-            height: 100vh;
-        }
+    .container-fluid {
+      display: flex;
+      min-height: 100vh;
+    }
 
-        .sidebar {
-            width: 250px;
-            color: #000;
-            padding-top: 150px;
-            position: fixed;
-            height: 100%;
-            padding-left: 20px;
-            text-align: center;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
+    .sidebar {
+      width: 250px;
+      background: var(--card-bg);
+      padding: 20px;
+      position: fixed;
+      height: 100%;
+      border-right: 1px solid var(--border-color);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      transition: width 0.3s;
+    }
 
-        .sidebar h3 {
-            color: #000;
-            margin-bottom: 30px;
-            font-size: 1.5rem;
-            text-align: center;
-            /* Center the sidebar title */
-        }
+    .sidebar h3 {
+      color: var(--primary-color);
+      font-size: 1.8rem;
+      text-align: center;
+      margin-bottom: 30px;
+    }
 
-        .sidebar .nav-link {
-            color: #000 !important;
-            padding: 15px;
-            font-size: 1.2rem;
-            text-decoration: none;
-            display: block;
-        }
+    .sidebar .nav-link {
+      color: var(--neutral-gray) !important;
+      padding: 12px 15px;
+      font-size: 1.1rem;
+      text-decoration: none;
+      display: block;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      transition: background-color 0.3s;
+    }
 
-        .main-content {
-            margin-left: 250px;
-            padding: 30px;
-            flex-grow: 1;
-            background-color: #fff;
-            color: #333;
-        }
+    .sidebar .nav-link:hover,
+    .sidebar .nav-link.active {
+      background-color: rgba(242, 242, 242, 0.5);
+    }
 
-        h1 {
-            font-size: 2.5rem;
-            color: #333;
-            margin-bottom: 40px;
-            text-align: center;
-        }
+    .main-content {
+      margin-left: 250px;
+      padding: 40px;
+      flex-grow: 1;
+      background-color: var(--bg-color);
+      min-height: 100vh;
+      transition: margin-left 0.3s;
+    }
 
-        .content-section {
-            display: none;
-        }
+    .main-content h1 {
+      font-size: 2.8rem;
+      margin-bottom: 20px;
+      text-align: center;
+      font-weight: 700;
+    }
 
-        .content-section.active {
-            display: block;
-        }
+    .content-section {
+      display: none;
+    }
 
-        .form-section {
-            background-color: #fff;
-            padding: 30px;
-            border-radius: 10px;
-            margin-bottom: 30px;
-            border: 1px solid #ddd;
-        }
+    .content-section.active {
+      display: block;
+    }
 
-        .form-control {
-            border-radius: 8px;
-            padding: 14px;
-            border: 1px solid #ddd;
-            width: 100%;
-            font-size: 1rem;
-            margin-bottom: 20px;
-        }
+    .form-section {
+      background-color: var(--card-bg);
+      padding: 30px;
+      border-radius: 16px;
+      margin-bottom: 30px;
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow);
+      transition: box-shadow 0.3s;
+    }
 
-        .form-control:focus {
-            border-color: #000;
-            box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
-        }
+    .form-section:hover {
+      box-shadow: var(--hover-shadow);
+    }
 
-        h2 {
-            margin-bottom: 20px;
-        }
+    .form-control {
+      border-radius: 12px;
+      padding: 12px;
+      border: 1px solid var(--border-color);
+      font-size: 1rem;
+      margin-bottom: 20px;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
 
-        .btn,
-        .back-btn a,
-        .main-content .btn {
-            text-decoration: none;
-            font-size: 0.9rem;
-            font-weight: bold;
-            color: #fff;
-            width: 200px;
-            display: inline-block;
-            padding: 5px 0;
-            border: 1px solid #000;
-            border-radius: 5px;
-            background-color: #000;
-            transition: all 0.3s ease;
-            text-align: center;
-            cursor: pointer;
-        }
+    .form-control:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 6px rgba(49, 130, 206, 0.5);
+    }
 
-        .btn:hover,
-        .back-btn a:hover,
-        .main-content .btn:hover {
-            background-color: #333;
-            color: #fff;
-        }
+    h2 {
+      margin-bottom: 20px;
+      font-weight: 500;
+    }
 
-        .list-group-item {
-            background-color: #f9f9f9;
-            border: 1px solid #ddd;
-            margin-bottom: 10px;
-            border-radius: 8px;
-            padding: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+    .btn,
+    .back-btn a,
+    .main-content .btn {
+      text-decoration: none;
+      font-size: 1rem;
+      font-weight: 500;
+      color: #fff;
+      width: 150px;
+      display: inline-block;
+      padding: 12px 0;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      text-align: center;
+      cursor: pointer;
+    }
 
-        .list-group-item:hover {
-            background-color: #f1f1f1;
-        }
+    .btn:hover,
+    .back-btn a:hover,
+    .main-content .btn:hover {
+      background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+      transform: translateY(-2px);
+    }
 
-        .list-group-item span {
-            font-size: 1rem;
-            color: #333;
-        }
+    .list-group-item {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      margin-bottom: 12px;
+      border-radius: 12px;
+      padding: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background-color 0.3s;
+      box-shadow: var(--shadow);
+    }
 
-        .list-group-item .badge {
-            background-color: #000;
-        }
+    .list-group-item:hover {
+      background-color: rgba(242, 242, 242, 0.5);
+      box-shadow: var(--hover-shadow);
+    }
 
-        .back-btn {
-            text-align: center;
-            margin-top: 20px;
-        }
+    .list-group-item span,
+    .list-group-item strong {
+      font-size: 1rem;
+    }
 
-        .flash-messages {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 1000;
-            text-align: center;
-            width: 50%;
-            padding: 15px;
-            border-radius: 10px;
-            background-color: transparent;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
+    .list-group-item .badge {
+      background-color: var(--primary-color);
+    }
 
-        h1,
-        h2,
-        h3,
-        h4,
-        h5,
-        h6 {
-            font-weight: bold;
-            /* Makes all headings bold */
-        }
+    .back-btn {
+      text-align: center;
+      margin-top: 20px;
+    }
 
-        .flash-messages .alert {
-            margin-bottom: 10px;
-            font-size: 1rem;
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid;
-        }
+    .flash-messages {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1000;
+      width: 50%;
+      padding: 15px;
+      border-radius: 10px;
+      background-color: var(--card-bg);
+      box-shadow: var(--shadow);
+      transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+      opacity: 0;
+      transform: translateY(-20px);
+    }
 
-        .flash-messages .alert-success {
-            background-color: #d4edda;
-            border-color: #28a745;
-            color: #155724;
-        }
+    .flash-messages.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
 
-        .flash-messages .alert-danger {
-            background-color: #f8d7da;
-            border-color: #f5c6cb;
-            color: #721c24;
-        }
+    .flash-messages .alert {
+      margin-bottom: 10px;
+      font-size: 1rem;
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
 
-        .button-container {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 1000;
-            display: flex;
-            gap: 10px;
-        }
+    .flash-messages .alert-success {
+      background-color: #d4edda;
+      border-color: #c3e6cb;
+      color: #155724;
+    }
 
-        .button-container .btn {
-            width: 120px;
-        }
+    .flash-messages .alert-danger {
+      background-color: #f8d7da;
+      border-color: #f5c6cb;
+      color: #721c24;
+    }
 
-        .sources-box {
-            position: absolute;
-            top: 200px;
-            /* Align with the top padding of the main content */
-            right: 30px;
-            /* Adjust as needed for spacing from the right */
-            width: 500px;
-            /* Set a width similar to the sidebar */
-            background-color: #fff;
-            /* Optional: background color */
-            padding: 20px;
-            /* Optional: padding for aesthetics */
-            border-radius: 10px;
-            /* Optional: rounded corners */
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            /* Optional: shadow for depth */
-        }
-    </style>
+    .sources-box {
+      position: fixed;
+      top: 200px;
+      right: 30px;
+      width: 400px;
+      background-color: var(--card-bg);
+      padding: 20px;
+      border-radius: 16px;
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }
+
+    .sources-box h5 {
+      margin-bottom: 10px;
+      font-weight: 600;
+      color: var(--primary-color);
+    }
+
+    .sources-box p {
+      margin-bottom: 20px;
+      color: var(--neutral-gray);
+    }
+
+    @media (max-width: 768px) {
+      .container-fluid {
+        flex-direction: column;
+      }
+
+      .sidebar {
+        position: relative;
+        width: 100%;
+        text-align: center;
+        padding: 20px;
+      }
+
+      .main-content {
+        margin-left: 0;
+        padding: 20px;
+      }
+
+      .sources-box {
+        position: relative;
+        top: auto;
+        right: auto;
+        width: 100%;
+        margin-top: 20px;
+      }
+    }
+  </style>
 </head>
 
 <body>
-    <div class="container-fluid">
-        <!-- Flash Message Block -->
-        {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-        <div class="flash-messages">
-            {% for category, message in messages %}
-            <div class="alert alert-{{ category }}">
-                {{ message }}
-            </div>
-            {% endfor %}
-        </div>
-        {% endif %}
-        {% endwith %}
-
-        <!-- Simplified Sidebar -->
-        <div class="sidebar">
-            <h3>Chatbase</h3>
-            <nav>
-                <ul class="nav flex-column">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="#" onclick="showTab('files')">
-                            <i class="bi bi-file-earmark" style="font-size: 1.2rem; margin-right: 10px;"></i> Files
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="showTab('text')">
-                            <i class="bi bi-pencil" style="font-size: 1.2rem; margin-right: 10px;"></i> Text
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="showTab('website')">
-                            <i class="bi bi-link" style="font-size: 1.2rem; margin-right: 10px;"></i> Website
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="showTab('qna')">
-                            <i class="bi bi-question-circle" style="font-size: 1.2rem; margin-right: 10px;"></i> Q&A
-                        </a>
-                    </li>
-                </ul>
-            </nav>
-        </div>
-
-        <!-- Main Content -->
-        <div class="main-content">
-            <h1>Data Sources</h1>
-
-            <!-- Content Sections -->
-            <div class="row">
-                <!-- Files Section -->
-                <div class="col-md-6 content-section files-section active" id="files">
-                    <div class="form-section">
-                        <h2>Upload File</h2>
-                        <form method="POST" enctype="multipart/form-data">
-                            <input type="file" name="file" class="form-control mb-3">
-                            <button type="submit" class="btn">Upload</button>
-                        </form>
-
-                        <h3>Uploaded Files</h3>
-                        <ul class="list-group-item">
-                            {% for file in data_sources %}
-                            {% if file.type == 'file' %}
-                            <li class="list-group">
-                                <form action="{{ url_for('delete_item', item_id=item[0]) }}" method="POST"
-                                    style="display:inline;">
-                                    <button type="submit">Delete</button>
-                                </form>
-                                <span>{{ file.content }}</span>
-                                <a href="{{ url_for('static', filename='uploads/' + file.content) }}" target="_blank"
-                                    class="badge">View</a>
-                            </li>
-                            {% endif %}
-                            {% endfor %}
-                        </ul>
-                    </div>
-                </div>
-
-                <!-- Text Section -->
-                <div class="col-md-6 content-section text-section" id="text">
-                    <div class="form-section">
-                        <h2>Add Text</h2>
-                        <form method="POST">
-                            <textarea name="text" class="form-control" placeholder="Enter your text here"
-                                rows="4"></textarea>
-                            <button type="submit" class="btn mt-3">Add Text</button>
-                        </form>
-
-                        <h3 class="mt-4">Your Text Entries</h3>
-                        <ul class="list-group">
-                            {% for text in data_sources %}
-                            {% if text.type == 'text' %}
-                            <li class="list-group-item">{{ text.content }}</li>
-                            {% endif %}
-                            {% endfor %}
-                        </ul>
-                    </div>
-                </div>
-
-                <!-- Website Section -->
-                <div class="col-md-6 content-section website-section" id="website">
-                    <div class="form-section">
-                        <h2>Crawl</h2>
-                        <form method="POST" action="/add_link">
-                            <input type="url" class="form-control mb-3" placeholder="https://www.example.com"
-                                name="website_url" required>
-                            <button type="submit" class="btn mt-2">Fetch Links</button>
-                        </form>
-
-                        <div class="mt-4">
-                            <h2>Submit Sitemap</h2>
-                            <input type="url" class="form-control mb-3"
-                                placeholder="https://www.example.com/sitemap.xml">
-                            <button class="btn mt-2">Load Sitemap</button>
-                        </div>
-
-                        <h3>Included Links</h3>
-                        <ul class="list-group">
-                            {% for source in data_sources %}
-                            {% if source.type == 'website' %}
-                            <li class="list-group-item">
-                                <a href="{{ source.content }}" target="_blank">{{ source.content }}</a>
-                            </li>
-                            {% endif %}
-                            {% endfor %}
-                        </ul>
-                    </div>
-                </div>
-
-                <!-- Q&A Section -->
-                <div class="col-md-6 content-section qna-section" id="qna">
-                    <div class="form-section">
-                        <h2>Add Question and Answer</h2>
-                        <form method="POST">
-                            <div class="mb-3">
-                                <input type="text" name="question" class="form-control" placeholder="Enter Question"
-                                    required>
-                            </div>
-                            <div class="mb-3">
-                                <input type="text" name="answer" class="form-control" placeholder="Enter Answer"
-                                    required>
-                            </div>
-                            <button type="submit" class="btn">Add Q&A</button>
-                        </form>
-
-                        <h3>Your Q&A Entries</h3>
-                        <ul class="list-group">
-                            {% for question in questions_answers %}
-                            <li class="list-group-item">
-                                <strong>{{ question }}</strong>
-                                <span>{{ answer }}</span>
-                                <form action="{{ url_for('delete_item', item_id=question[0]) }}" method="POST"
-                                    style="display:inline;">
-                                    <button type="submit">Delete</button>
-                                </form>
-                            </li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Back Button -->
-            <div class="text-center mt-5">
-                <a href="{{ url_for('home') }}" class="btn">Back to Home</a>
-                <a href="{{ url_for('manage_data_sources') }}" class="btn">Refresh</a>
-            </div>
-        </div>
-
-        <!-- Create Chatbot Button (Positioned to Upper-Right) -->
-        <div class="position-absolute middle-right p-4 sources-box">
-            <h5>Sources</h5>
-            <p>Total Detected Characters: 0 / 400,000 limit</p>
-            <button class="btn" onclick="redirectToChatbot()">Create Chatbot</button>
-        </div>
+  <div class="container-fluid">
+    <!-- Flash Message Block -->
+    <div id="flash-container" class="flash-messages">
+      <div class="alert alert-success" id="flash-success" role="alert">
+        Content added successfully!
+      </div>
+      <div class="alert alert-danger" id="flash-error" role="alert">
+        Error adding content. Please try again.
+      </div>
     </div>
 
-    <!-- Bootstrap JS and Popper.js -->
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <h3>Chatbase</h3>
+      <nav>
+        <ul class="nav flex-column">
+          <li class="nav-item">
+            <a class="nav-link active" href="#" onclick="showTab('files')">
+              <i class="bi bi-file-earmark" style="font-size: 1.2rem; margin-right: 10px;"></i> Files
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#" onclick="showTab('text')">
+              <i class="bi bi-pencil" style="font-size: 1.2rem; margin-right: 10px;"></i> Text
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#" onclick="showTab('website')">
+              <i class="bi bi-link" style="font-size: 1.2rem; margin-right: 10px;"></i> Website
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#" onclick="showTab('qna')">
+              <i class="bi bi-question-circle" style="font-size: 1.2rem; margin-right: 10px;"></i> Q&A
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
 
-    <script>
-        // Show the active tab
-        function showTab(tabName) {
-            const tabs = document.querySelectorAll('.content-section');
-            tabs.forEach(tab => tab.classList.remove('active'));
-            document.getElementById(tabName).classList.add('active');
-        }
+    <!-- Main Content -->
+    <div class="main-content">
+      <h1>Data Sources <span id="document-name"></span></h1>
+      <div class="row">
+        <!-- Files Section -->
+        <div class="col-md-6 content-section files-section active" id="files">
+          <div class="form-section">
+            <h2>Upload File</h2>
+            <form method="POST" enctype="multipart/form-data" id="upload-form">
+              <input type="file" name="file" class="form-control mb-3" onchange="updateDocumentName(this)">
+              <button type="submit" class="btn">Upload</button>
+            </form>
 
-        function redirectToChatbot() {
-            window.location.href = "/chatbot";
-        }
-    </script>
+            <h3>Uploaded Files</h3>
+            <ul class="list-group" id="uploaded-files">
+              <!-- Dynamically populated -->
+            </ul>
+          </div>
+        </div>
+
+        <!-- Text Section -->
+        <div class="col-md-6 content-section text-section" id="text">
+          <div class="form-section">
+            <h2>Add Text</h2>
+            <form method="POST" id="text-form">
+              <textarea name="text" class="form-control" placeholder="Enter your text here" rows="4"></textarea>
+              <button type="submit" class="btn mt-3">Add Text</button>
+            </form>
+
+            <h3 class="mt-4">Your Text Entries</h3>
+            <ul class="list-group" id="text-entries">
+              <!-- Dynamically populated -->
+            </ul>
+          </div>
+        </div>
+
+        <!-- Website Section -->
+        <div class="col-md-6 content-section website-section" id="website">
+          <div class="form-section">
+            <h2>Crawl</h2>
+            <form method="POST" action="/add_link" id="website-form">
+              <input type="url" class="form-control mb-3" placeholder="https://www.example.com" name="website_url" required>
+              <button type="submit" class="btn mt-2">Fetch Links</button>
+            </form>
+
+            <div class="mt-4">
+              <h2>Submit Sitemap</h2>
+              <input type="url" class="form-control mb-3" placeholder="https://www.example.com/sitemap.xml">
+              <button class="btn mt-2">Load Sitemap</button>
+            </div>
+
+            <h3>Included Links</h3>
+            <ul class="list-group" id="website-entries">
+              <!-- Dynamically populated -->
+            </ul>
+          </div>
+        </div>
+
+        <!-- Q&A Section -->
+        <div class="col-md-6 content-section qna-section" id="qna">
+          <div class="form-section">
+            <h2>Add Question and Answer</h2>
+            <form method="POST" id="qna-form">
+              <div class="mb-3">
+                <input type="text" name="question" class="form-control" placeholder="Enter Question" required>
+              </div>
+              <div class="mb-3">
+                <input type="text" name="answer" class="form-control" placeholder="Enter Answer" required>
+              </div>
+              <button type="submit" class="btn">Add Q&A</button>
+            </form>
+
+            <h3>Your Q&A Entries</h3>
+            <ul class="list-group" id="qna-entries">
+              <!-- Dynamically populated -->
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Back and Refresh Buttons -->
+      <div class="text-center mt-5">
+        <a href="{{ url_for('home') }}" class="btn">Back to Home</a>
+        <a href="{{ url_for('manage_data_sources') }}" class="btn">Refresh</a>
+      </div>
+    </div>
+
+    <!-- Create Chatbot Button (Right Side Sources Box) -->
+    <div class="sources-box">
+      <h5>Sources</h5>
+      <p>Total Detected Characters: 0 / 400,000 limit</p>
+      <button class="btn" onclick="redirectToChatbot()">Create Chatbot</button>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS and Popper.js -->
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+
+  <script>
+    // Show the active tab
+    function showTab(tabName) {
+      const tabs = document.querySelectorAll('.content-section');
+      tabs.forEach(tab => tab.classList.remove('active'));
+      document.getElementById(tabName).classList.add('active');
+    }
+
+    function redirectToChatbot() {
+      window.location.href = "/chatbot";
+    }
+
+    // When a file is selected, update the document name shown in the header.
+    function updateDocumentName(input) {
+      const fileName = input.files[0] ? input.files[0].name : '';
+      document.getElementById('document-name').innerText = fileName ? " - " + fileName : "";
+
+      // Add file name to the list
+      const fileList = document.getElementById('uploaded-files');
+      const listItem = document.createElement('li');
+      listItem.className = 'list-group-item';
+      listItem.innerHTML = `
+        <span><strong>${fileName}</strong></span>
+        <a href="#" class="badge">View</a>
+      `;
+      fileList.appendChild(listItem);
+
+      // Show flash message
+      showFlashMessage('success');
+    }
+
+    // Handle form submissions to stay on the same page
+    document.getElementById('upload-form').addEventListener('submit', function(event) {
+      event.preventDefault();
+      showFlashMessage('success');
+    });
+
+    document.getElementById('text-form').addEventListener('submit', function(event) {
+      event.preventDefault();
+      const text = event.target.elements.text.value;
+      addTextEntry(text);
+      showFlashMessage('success');
+    });
+
+    document.getElementById('website-form').addEventListener('submit', function(event) {
+      event.preventDefault();
+      const url = event.target.elements.website_url.value;
+      addWebsiteEntry(url);
+      showFlashMessage('success');
+    });
+
+    document.getElementById('qna-form').addEventListener('submit', function(event) {
+      event.preventDefault();
+      const question = event.target.elements.question.value;
+      const answer = event.target.elements.answer.value;
+      addQnAEntry(question, answer);
+      showFlashMessage('success');
+    });
+
+    function addTextEntry(text) {
+      const textList = document.getElementById('text-entries');
+      const listItem = document.createElement('li');
+      listItem.className = 'list-group-item';
+      listItem.innerText = text;
+      textList.appendChild(listItem);
+    }
+
+    function addWebsiteEntry(url) {
+      const websiteList = document.getElementById('website-entries');
+      const listItem = document.createElement('li');
+      listItem.className = 'list-group-item';
+      listItem.innerHTML = `<a href="${url}" target="_blank">${url}</a>`;
+      websiteList.appendChild(listItem);
+    }
+
+    function addQnAEntry(question, answer) {
+      const qnaList = document.getElementById('qna-entries');
+      const listItem = document.createElement('li');
+      listItem.className = 'list-group-item';
+      listItem.innerHTML = `
+        <div>
+          <strong>${question}</strong><br>
+          <span>${answer}</span>
+        </div>
+      `;
+      qnaList.appendChild(listItem);
+    }
+
+    function showFlashMessage(type) {
+      const flashContainer = document.getElementById('flash-container');
+      flashContainer.classList.add('show');
+      setTimeout(() => {
+        flashContainer.classList.remove('show');
+      }, 3000);
+    }
+  </script>
 </body>
 
 </html>
