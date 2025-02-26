@@ -2,518 +2,703 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Data Sources</title>
-  <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <!-- Font Awesome for icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
-  <!-- Inter Font -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&display=swap" rel="stylesheet" />
-  <style>
-    :root {
-      --primary-color: #3182ce;
-      --secondary-color: #2b6cb0;
-      --bg-color: #f9fafb;
-      --card-bg: #ffffff;
-      --border-color: rgba(0, 0, 0, 0.1);
-      --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-      --hover-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-      --neutral-gray: #6c757d;
-    }
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Data Sources</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&display=swap" rel="stylesheet" />
+    <style>
+        :root {
+            /* Less Blue Color Palette */
+            --primary-color: #5085c7;       /* A slightly muted blue */
+            --secondary-color: #5b9bd5;     /* A lighter, less saturated blue */
+            --accent-color: #66a1e1;        /* Another accent, still blue but softer */
+            --bg-color: #f8f9fa;            /* Very light gray background */
+            --card-bg: #ffffff;             /* White cards for clean look */
+            --border-color: #e0e0e0;        /* Light gray border */
+            --shadow: 0 2px 10px rgba(0, 0, 0, 0.08); /* Subtle shadow */
+            --hover-shadow: 0 6px 15px rgba(0, 0, 0, 0.1); /* Slightly stronger hover shadow */
+            --neutral-gray: #757575;        /* Neutral gray for text */
+            --dark-text: #333;              /* Darker text for readability */
+        }
 
-    body {
-      font-family: 'Inter', sans-serif;
-      background-color: var(--bg-color);
-      color: var(--neutral-gray);
-      margin: 0;
-      padding: 0;
-    }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color); /* Use background color variable */
+            color: var(--dark-text);        /* Use dark text variable */
+            margin: 0;
+            padding: 0;
+        }
 
-    .container-fluid {
-      display: flex;
-      min-height: 100vh;
-    }
+        .container-fluid {
+            display: flex;
+            min-height: 100vh;
+        }
 
-    .sidebar {
-      width: 250px;
-      background: var(--card-bg);
-      padding: 20px;
-      position: fixed;
-      height: 100%;
-      border-right: 1px solid var(--border-color);
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(10px);
-      transition: width 0.3s;
-    }
+        /* Sidebar adjustments - No change here as per request, adjust if needed */
+        .sidebar {
+            width: 220px; /* Slightly narrower sidebar for more content space */
+            background: var(--card-bg);
+            padding: 20px;
+            position: fixed;
+            height: 100%;
+            border-right: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+            transition: width 0.3s;
+            z-index: 100;
+        }
 
-    .sidebar h3 {
-      color: var(--primary-color);
-      font-size: 1.8rem;
-      text-align: center;
-      margin-bottom: 30px;
-    }
+        .sidebar h3 {
+            color: var(--primary-color);
+            font-size: 1.6rem; /* Slightly smaller sidebar title */
+            text-align: center;
+            margin-bottom: 25px; /* Reduced bottom margin */
+        }
 
-    .sidebar .nav-link {
-      color: var(--neutral-gray) !important;
-      padding: 12px 15px;
-      font-size: 1.1rem;
-      text-decoration: none;
-      display: block;
-      border-radius: 8px;
-      margin-bottom: 8px;
-      transition: background-color 0.3s;
-    }
+        .sidebar .nav-link {
+            color: var(--primary-color) !important;
+            padding: 10px 12px; /* Reduced padding in sidebar links */
+            font-size: 1rem;
+            text-decoration: none;
+            display: block;
+            border-radius: 6px; /* Less rounded sidebar links */
+            margin-bottom: 6px; /* Reduced bottom margin */
+            transition: background-color 0.3s;
+        }
 
-    .sidebar .nav-link:hover,
-    .sidebar .nav-link.active {
-      background-color: rgba(242, 242, 242, 0.5);
-    }
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            background-color: rgba(242, 242, 242, 0.7); /* Slightly darker hover for contrast */
+        }
 
-    .main-content {
-      margin-left: 250px;
-      padding: 40px;
-      flex-grow: 1;
-      background-color: var(--bg-color);
-      min-height: 100vh;
-      transition: margin-left 0.3s;
-    }
+        /* Main content adjustments - Widened Data Sources Section */
+        .main-content {
+            margin-left: 220px; /* Adjust margin to the new sidebar width */
+            padding: 25px;
+            flex-grow: 1;
+            background-color: var(--bg-color);
+            min-height: 100vh;
+            transition: margin-left 0.3s;
+        }
 
-    .main-content h1 {
-      font-size: 2.8rem;
-      margin-bottom: 20px;
-      text-align: center;
-      font-weight: 700;
-    }
+        .main-content h1 {
+            font-size: 2.3rem; /* Slightly smaller main title */
+            margin-bottom: 20px; /* Reduced bottom margin */
+            text-align: left;
+            font-weight: 700;
+        }
 
-    .content-section {
-      display: none;
-    }
+        .content-section {
+            display: none;
+        }
 
-    .content-section.active {
-      display: block;
-    }
+        .content-section.active {
+            display: block;
+        }
 
-    .form-section {
-      background-color: var(--card-bg);
-      padding: 30px;
-      border-radius: 16px;
-      margin-bottom: 30px;
-      border: 1px solid var(--border-color);
-      box-shadow: var(--shadow);
-      transition: box-shadow 0.3s;
-    }
+        .form-section {
+            background-color: var(--card-bg);
+            padding: 20px; /* Further reduced padding in forms */
+            border-radius: 10px; /* Less rounded forms */
+            margin-bottom: 20px; /* Reduced bottom margin */
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+            transition: box-shadow 0.3s;
+        }
 
-    .form-section:hover {
-      box-shadow: var(--hover-shadow);
-    }
+        .form-section:hover {
+            box-shadow: var(--hover-shadow);
+        }
 
-    .form-control {
-      border-radius: 12px;
-      padding: 12px;
-      border: 1px solid var(--border-color);
-      font-size: 1rem;
-      margin-bottom: 20px;
-      transition: border-color 0.3s ease, box-shadow 0.3s ease;
-    }
+        .form-section h2 {
+            margin-bottom: 12px; /* Reduced margin in form headings */
+            font-size: 1.5rem; /* Smaller form headings */
+            font-weight: 500;
+            color: var(--dark-text); /* Darker text for form headings */
+        }
 
-    .form-control:focus {
-      border-color: var(--primary-color);
-      box-shadow: 0 0 6px rgba(49, 130, 206, 0.5);
-    }
+        .form-control {
+            border-radius: 6px; /* Even less rounded input fields */
+            padding: 9px; /* Further reduced padding */
+            font-size: 1rem;
+            margin-bottom: 12px; /* Reduced bottom margin */
+            border-color: var(--border-color); /* Consistent border color */
+        }
 
-    h2 {
-      margin-bottom: 20px;
-      font-weight: 500;
-    }
+        .form-control:focus {
+            border-color: var(--accent-color); /* Focus color is now accent color */
+            box-shadow: 0 0 6px rgba(var(--primary-color-rgb), 0.3); /* Use accent color for focus */
+        }
 
-    .btn,
-    .back-btn a,
-    .main-content .btn {
-      text-decoration: none;
-      font-size: 1rem;
-      font-weight: 500;
-      color: #fff;
-      width: 150px;
-      display: inline-block;
-      padding: 12px 0;
-      border: none;
-      border-radius: 12px;
-      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-      transition: background-color 0.3s ease, transform 0.2s ease;
-      text-align: center;
-      cursor: pointer;
-    }
 
-    .btn:hover,
-    .back-btn a:hover,
-    .main-content .btn:hover {
-      background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
-      transform: translateY(-2px);
-    }
+        .btn,
+        .back-btn a,
+        .main-content .btn {
+            font-size: 1rem;
+            width: auto;
+            padding: 9px 18px; /* Further adjusted button padding */
+            border-radius: 8px;
+            background-color: var(--primary-color); /* Use primary color for buttons */
+            border: 1px solid var(--primary-color); /* Add border for solid look */
+            color: var(--card-bg); /* White text on buttons */
+            transition: background-color 0.3s ease, transform 0.2s ease, border-color 0.3s ease;
+        }
 
-    .list-group-item {
-      background-color: var(--card-bg);
-      border: 1px solid var(--border-color);
-      margin-bottom: 12px;
-      border-radius: 12px;
-      padding: 15px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      transition: background-color 0.3s;
-      box-shadow: var(--shadow);
-    }
+        .btn:hover,
+        .back-btn a:hover,
+        .main-content .btn:hover {
+            background-color: var(--accent-color); /* Hover to accent color */
+            border-color: var(--accent-color);     /* Border hover matches background */
+            transform: translateY(-1px); /* Less pronounced hover lift */
+        }
 
-    .list-group-item:hover {
-      background-color: rgba(242, 242, 242, 0.5);
-      box-shadow: var(--hover-shadow);
-    }
+        .btn-outline-primary {
+            background-color: transparent;       /* Make outline buttons transparent */
+            color: var(--primary-color);        /* Text color for outline buttons */
+            border-color: var(--primary-color); /* Border color for outline buttons */
+        }
 
-    .list-group-item span,
-    .list-group-item strong {
-      font-size: 1rem;
-    }
+        .btn-outline-primary:hover {
+            background-color: var(--bg-color);   /* Slightly gray hover for outline button */
+            border-color: var(--accent-color); /* Border hover to accent color */
+            color: var(--accent-color);         /* Text hover to accent color */
+        }
 
-    .list-group-item .badge {
-      background-color: var(--primary-color);
-    }
 
-    .back-btn {
-      text-align: center;
-      margin-top: 20px;
-    }
+        .list-group-item {
+            border-radius: 8px;
+            padding: 10px; /* Further reduced padding in list items */
+            margin-bottom: 8px; /* Reduced bottom margin */
+            box-shadow: var(--shadow);
+            border-color: var(--border-color); /* Consistent border color */
+            background-color: var(--card-bg); /* White list items */
+        }
 
-    .flash-messages {
-      position: fixed;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 1000;
-      width: 50%;
-      padding: 15px;
-      border-radius: 10px;
-      background-color: var(--card-bg);
-      box-shadow: var(--shadow);
-      transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
-      opacity: 0;
-      transform: translateY(-20px);
-    }
+        .list-group-item:hover {
+            box-shadow: var(--hover-shadow);
+            background-color: rgba(248, 249, 250, 0.8); /* Lighter hover background */
+        }
 
-    .flash-messages.show {
-      opacity: 1;
-      transform: translateY(0);
-    }
+        .list-group-item span,
+        .list-group-item strong {
+            font-size: 1rem;
+            color: var(--dark-text); /* Darker text in list items */
+        }
 
-    .flash-messages .alert {
-      margin-bottom: 10px;
-      font-size: 1rem;
-      padding: 15px;
-      border-radius: 8px;
-      border: 1px solid var(--border-color);
-    }
+        .list-group-item .badge {
+            border-radius: 6px;
+            background-color: var(--accent-color); /* Badge uses accent color */
+            color: var(--card-bg);               /* White text on badge */
+        }
 
-    .flash-messages .alert-success {
-      background-color: #d4edda;
-      border-color: #c3e6cb;
-      color: #155724;
-    }
+        .back-btn {
+            margin-top: 15px;
+            text-align: center;
+        }
 
-    .flash-messages .alert-danger {
-      background-color: #f8d7da;
-      border-color: #f5c6cb;
-      color: #721c24;
-    }
+        .flash-messages {
+            position: fixed; /* Keep fixed positioning */
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1050; /* Ensure it's above sidebar and other content */
+            width: 90%; /* Wider flash messages on larger screens */
+            max-width: 700px; /* Max width for flash messages */
+            padding: 10px; /* Further reduced padding in flash messages */
+            border-radius: 6px;
+            background-color: var(--card-bg); /* White flash messages background */
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color); /* Consistent border color */
+            opacity: 1; /* Ensure flashes are visible */
+        }
 
-    .sources-box {
-      position: fixed;
-      top: 200px;
-      right: 30px;
-      width: 400px;
-      background-color: var(--card-bg);
-      padding: 20px;
-      border-radius: 16px;
-      border: 1px solid var(--border-color);
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(10px);
-    }
+        .flash-messages .alert {
+            margin-bottom: 6px; /* Reduced bottom margin */
+            font-size: 0.95rem; /* Slightly smaller alert text */
+            padding: 8px; /* Reduced padding in alerts */
+            border-radius: 4px; /* Less rounded alerts */
+            border: 1px solid var(--border-color); /* Consistent border for alerts */
+        }
 
-    .sources-box h5 {
-      margin-bottom: 10px;
-      font-weight: 600;
-      color: var(--primary-color);
-    }
+        .flash-messages .alert-success {
+            background-color: #e8f5e9; /* Light green success alert */
+            color: #388e3c;          /* Green text for success */
+            border-color: #c8e6c9;    /* Light green border for success */
+        }
 
-    .sources-box p {
-      margin-bottom: 20px;
-      color: var(--neutral-gray);
-    }
+        .flash-messages .alert-danger {
+            background-color: #ffebee; /* Light red danger alert */
+            color: #d32f2f;          /* Red text for danger */
+            border-color: #ffcdd2;    /* Light red border for danger */
+        }
 
-    @media (max-width: 768px) {
-      .container-fluid {
-        flex-direction: column;
-      }
 
-      .sidebar {
-        position: relative;
-        width: 100%;
-        text-align: center;
-        padding: 20px;
-      }
+        .sources-box {
+            position: sticky;
+            top: 20px;
+            right: 20px;
+            width: 380px; /* Slightly wider sources box */
+            padding: 18px; /* Reduced padding in sources box */
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            background-color: var(--card-bg); /* White sources box */
+            border-color: var(--border-color); /* Consistent border color */
+        }
 
-      .main-content {
-        margin-left: 0;
-        padding: 20px;
-      }
+        .sources-box h5 {
+            margin-bottom: 8px;
+            font-size: 1.2rem; /* Slightly smaller sources box heading */
+            color: var(--dark-text); /* Darker text for sources box heading */
+        }
 
-      .sources-box {
-        position: relative;
-        top: auto;
-        right: auto;
-        width: 100%;
-        margin-top: 20px;
-      }
-    }
-  </style>
+        .sources-box p {
+            margin-bottom: 15px;
+            font-size: 0.9rem; /* Even smaller text in sources box paragraph */
+            color: var(--neutral-gray); /* Neutral gray for sources box text */
+        }
+
+        /* Responsive adjustments - Adjust breakpoints and widths as needed */
+        @media (max-width: 1200px) { /* Adjust for larger screens if needed */
+            .main-content {
+                padding-right: 10px; /* Reduce right padding on larger screens if sidebar is too wide */
+            }
+             .row {
+                display: flex;
+                flex-wrap: wrap; /* Ensure columns wrap on smaller screens */
+                margin-right: -10px; /* Adjust margin to compensate for padding */
+                margin-left: -10px;
+            }
+
+            .row > .col-md-8 { /* Wider columns for content on larger screens */
+                width: 66.666667%; /* Adjust width for wider main content */
+                max-width: 66.666667%;
+                flex: 0 0 66.666667%;
+            }
+             .col-md-4 { /* Sources box column width - adjust if needed to balance layout */
+                width: 33.333333%;
+                max-width: 33.333333%;
+                flex: 0 0 33.333333%;
+            }
+             .col-md-6 { /* Reset default col-md-6 width if not explicitly needed here */
+                width: 50%;
+                max-width: 50%;
+                flex: 0 0 50%;
+            }
+        }
+
+
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 190px; /* Further reduce sidebar width on medium screens */
+                padding: 15px;
+            }
+
+            .sidebar h3 {
+                font-size: 1.4rem;
+                margin-bottom: 15px;
+            }
+
+            .sidebar .nav-link {
+                font-size: 0.9rem;
+                padding: 8px 10px;
+            }
+
+            .main-content {
+                margin-left: 190px;
+                padding: 20px;
+            }
+
+            .main-content h1 {
+                font-size: 2rem;
+                margin-bottom: 15px;
+            }
+
+            .sources-box {
+                width: 320px; /* Further reduce sources box width on medium screens */
+                right: 15px;
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container-fluid {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                position: static;
+                width: 100%;
+                text-align: left;
+                padding: 15px;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+            }
+
+            .sidebar h3 {
+                text-align: left;
+                margin-bottom: 10px;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 15px;
+            }
+
+            .main-content h1 {
+                font-size: 1.8rem;
+                margin-bottom: 10px;
+            }
+
+            .sources-box {
+                position: static;
+                width: 100%;
+                margin-top: 15px;
+                margin-right: 0;
+            }
+
+            .form-section {
+                padding: 15px; /* Reduce form padding on small screens */
+                margin-bottom: 15px;
+            }
+
+            .form-section h2 {
+                font-size: 1.3rem; /* Further reduce form heading size */
+                margin-bottom: 10px;
+            }
+
+             .row > .col-md-8, /* Adjust column widths for small screens */
+            .row > .col-md-4,
+            .row > .col-md-6 {
+                width: 100%;
+                max-width: 100%;
+                flex: 0 0 100%;
+            }
+        }
+    </style>
 </head>
 
 <body>
-  <div class="container-fluid">
-    <!-- Flash Message Block -->
-    <div id="flash-container" class="flash-messages">
-      <div class="alert alert-success" id="flash-success" role="alert">
-        Content added successfully!
-      </div>
-      <div class="alert alert-danger" id="flash-error" role="alert">
-        Error adding content. Please try again.
-      </div>
-    </div>
-
-    <!-- Sidebar -->
-    <div class="sidebar">
-      <h3>Chatbase</h3>
-      <nav>
-        <ul class="nav flex-column">
-          <li class="nav-item">
-            <a class="nav-link active" href="#" onclick="showTab('files')">
-              <i class="bi bi-file-earmark" style="font-size: 1.2rem; margin-right: 10px;"></i> Files
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#" onclick="showTab('text')">
-              <i class="bi bi-pencil" style="font-size: 1.2rem; margin-right: 10px;"></i> Text
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#" onclick="showTab('website')">
-              <i class="bi bi-link" style="font-size: 1.2rem; margin-right: 10px;"></i> Website
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#" onclick="showTab('qna')">
-              <i class="bi bi-question-circle" style="font-size: 1.2rem; margin-right: 10px;"></i> Q&A
-            </a>
-          </li>
-        </ul>
-      </nav>
-    </div>
-
-    <!-- Main Content -->
-    <div class="main-content">
-      <h1>Data Sources <span id="document-name"></span></h1>
-      <div class="row">
-        <!-- Files Section -->
-        <div class="col-md-6 content-section files-section active" id="files">
-          <div class="form-section">
-            <h2>Upload File</h2>
-            <form method="POST" enctype="multipart/form-data" id="upload-form">
-              <input type="file" name="file" class="form-control mb-3" onchange="updateDocumentName(this)">
-              <button type="submit" class="btn">Upload</button>
-            </form>
-
-            <h3>Uploaded Files</h3>
-            <ul class="list-group" id="uploaded-files">
-              <!-- Dynamically populated -->
-            </ul>
-          </div>
+    <div class="container-fluid">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="flash-messages" id="flash-messages">
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">
+                {{ message }}
+            </div>
+            {% endfor %}
         </div>
+        {% endif %}
+        {% endwith %}
 
-        <!-- Text Section -->
-        <div class="col-md-6 content-section text-section" id="text">
-          <div class="form-section">
-            <h2>Add Text</h2>
-            <form method="POST" id="text-form">
-              <textarea name="text" class="form-control" placeholder="Enter your text here" rows="4"></textarea>
-              <button type="submit" class="btn mt-3">Add Text</button>
-            </form>
-
-            <h3 class="mt-4">Your Text Entries</h3>
-            <ul class="list-group" id="text-entries">
-              <!-- Dynamically populated -->
-            </ul>
-          </div>
+        <div class="sidebar">
+            <h3>Chatbase</h3>
+            <nav>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#" onclick="showTab('files')">
+                            <i class="fas fa-file-alt" style="font-size: 1.2rem; margin-right: 10px;"></i> Files
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showTab('text')">
+                            <i class="fas fa-pencil-alt" style="font-size: 1.2rem; margin-right: 10px;"></i> Text
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showTab('website')">
+                            <i class="fas fa-link" style="font-size: 1.2rem; margin-right: 10px;"></i> Website
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showTab('qna')">
+                            <i class="fas fa-question-circle" style="font-size: 1.2rem; margin-right: 10px;"></i> Q&A
+                        </a>
+                    </li>
+                </ul>
+            </nav>
         </div>
-
-        <!-- Website Section -->
-        <div class="col-md-6 content-section website-section" id="website">
-          <div class="form-section">
-            <h2>Crawl</h2>
-            <form method="POST" action="/add_link" id="website-form">
-              <input type="url" class="form-control mb-3" placeholder="https://www.example.com" name="website_url" required>
-              <button type="submit" class="btn mt-2">Fetch Links</button>
-            </form>
-
-            <div class="mt-4">
-              <h2>Submit Sitemap</h2>
-              <input type="url" class="form-control mb-3" placeholder="https://www.example.com/sitemap.xml">
-              <button class="btn mt-2">Load Sitemap</button>
+        <div class="flash-messages dynamic-flash-messages" id="dynamic-flash-messages" style="display:none;">
+        </div>
+        <div class="main-content">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h1>Data Sources <span id="document-name"></span></h1>
             </div>
 
-            <h3>Included Links</h3>
-            <ul class="list-group" id="website-entries">
-              <!-- Dynamically populated -->
-            </ul>
-          </div>
+            <div class="row">
+                <div class="col-md-8 content-section files-section active" id="files">
+                    <div class="form-section">
+                        <h2>Upload File</h2>
+                        <form id="uploadFormFiles" method="POST" enctype="multipart/form-data" class="data-form" data-tab-id="files">
+                            <div class="mb-3">
+                                <label for="fileUpload" class="form-label">Choose file</label>
+                                <input type="file" name="file" class="form-control" id="fileUpload"
+                                    onchange="updateDocumentName(this)">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Upload</button>
+                        </form>
+
+                        <h3 class="mt-4">Uploaded Files</h3>
+                        <ul class="list-group" id="uploaded-files">
+                            {% for file in data_sources %}
+                            {% if file.type == 'file' %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center" data-item-id="{{ file.id }}">
+                                <div>
+                                    <strong>{{ file.content }}</strong>
+                                </div>
+                                <div>
+                                    <a href="{{ url_for('static', filename='uploads/' ~ file.content) }}" target="_blank"
+                                        class="btn btn-sm btn-outline-primary me-2">View</a>
+                                    <form action="{{ url_for('delete_item', item_id=file[0]) }}" method="POST"
+                                        class="delete-form" style="display:inline;">
+                                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                                    </form>
+                                </div>
+                            </li>
+                            {% endif %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="col-md-8 content-section text-section" id="text">
+                    <div class="form-section">
+                        <h2>Add Text</h2>
+                        <form id="uploadFormText" method="POST" class="data-form" data-tab-id="text">
+                            <div class="mb-3">
+                                <label for="textInput" class="form-label">Enter your text</label>
+                                <textarea name="text" class="form-control" id="textInput" placeholder="Enter your text here"
+                                    rows="5"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary mt-2">Add Text</button>
+                        </form>
+
+                        <h3 class="mt-4">Your Text Entries</h3>
+                        <ul class="list-group" id="text-entries">
+                            {% for text in data_sources %}
+                            {% if text.type == 'text' %}
+                            <li class="list-group-item" data-item-id="{{ text.id }}">{{ text.content }}</li>
+                            {% endif %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="col-md-8 content-section website-section" id="website">
+                    <div class="form-section">
+                        <h2>Crawl Website</h2>
+                        <form id="uploadFormWebsite" method="POST" class="data-form" data-tab-id="website">
+                            <div class="mb-3">
+                                <label for="websiteUrl" class="form-label">Website URL</label>
+                                <input type="url" class="form-control" id="websiteUrl" placeholder="https://www.example.com"
+                                    name="website" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary mt-2">Fetch Links</button>
+                        </form>
+
+                        <h3 class="mt-4">Included Links</h3>
+                        <ul class="list-group" id="website-links">
+                            {% for source in data_sources %}
+                            {% if source.type == 'website' %}
+                            <li class="list-group-item" data-item-id="{{ source.id }}">
+                                <a href="{{ source.content }}" target="_blank">{{ source.content }}</a>
+                            </li>
+                            {% endif %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+
+
+                <div class="col-md-8 content-section qna-section" id="qna">
+                    <div class="form-section">
+                        <h2>Add Question and Answer</h2>
+                        <form id="uploadFormQna" method="POST" class="data-form" data-tab-id="qna">
+                            <div class="mb-3">
+                                <label for="questionInput" class="form-label">Question</label>
+                                <input type="text" name="question" class="form-control" id="questionInput" placeholder="Enter Question"
+                                    required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="answerInput" class="form-label">Answer</label>
+                                <input type="text" name="answer" class="form-control" id="answerInput" placeholder="Enter Answer"
+                                    required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Add Q&A</button>
+                        </form>
+
+                        <h3 class="mt-4">Your Q&A Entries</h3>
+                        <ul class="list-group" id="qa-entries">
+                            {% for qa in questions_answers %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center" data-item-id="{{ qa[0] }}">
+                                <div>
+                                    <strong>{{ qa[1] }}</strong><br>
+                                    <span class="text-muted">{{ qa[2] }}</span>
+                                </div>
+                                <div>
+                                    <form action="{{ url_for('delete_item', item_id=qa[0]) }}" method="POST"
+                                        class="delete-form" style="display:inline;">
+                                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                                    </form>
+                                </div>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <a href="{{ url_for('home') }}" class="btn btn-secondary me-2">Back to Home</a>
+                <a href="{{ url_for('manage_data_sources') }}" class="btn btn-outline-primary">Refresh Data</a>
+            </div>
         </div>
 
-        <!-- Q&A Section -->
-        <div class="col-md-6 content-section qna-section" id="qna">
-          <div class="form-section">
-            <h2>Add Question and Answer</h2>
-            <form method="POST" id="qna-form">
-              <div class="mb-3">
-                <input type="text" name="question" class="form-control" placeholder="Enter Question" required>
-              </div>
-              <div class="mb-3">
-                <input type="text" name="answer" class="form-control" placeholder="Enter Answer" required>
-              </div>
-              <button type="submit" class="btn">Add Q&A</button>
-            </form>
-
-            <h3>Your Q&A Entries</h3>
-            <ul class="list-group" id="qna-entries">
-              <!-- Dynamically populated -->
-            </ul>
-          </div>
+        <div class="sources-box col-md-4">
+            <h5>Sources Summary</h5>
+            <p>Total Detected Characters: 0 / 400,000 limit</p>
+            <button class="btn btn-primary w-100" onclick="redirectToChatbot()">Create Chatbot</button>
         </div>
-      </div>
-
-      <!-- Back and Refresh Buttons -->
-      <div class="text-center mt-5">
-        <a href="{{ url_for('home') }}" class="btn">Back to Home</a>
-        <a href="{{ url_for('manage_data_sources') }}" class="btn">Refresh</a>
-      </div>
     </div>
 
-    <!-- Create Chatbot Button (Right Side Sources Box) -->
-    <div class="sources-box">
-      <h5>Sources</h5>
-      <p>Total Detected Characters: 0 / 400,000 limit</p>
-      <button class="btn" onclick="redirectToChatbot()">Create Chatbot</button>
-    </div>
-  </div>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
 
-  <!-- Bootstrap JS and Popper.js -->
-  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    <script>
+        // Show the active tab
+        function showTab(tabName) {
+            const tabs = document.querySelectorAll('.content-section');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
 
-  <script>
-    // Show the active tab
-    function showTab(tabName) {
-      const tabs = document.querySelectorAll('.content-section');
-      tabs.forEach(tab => tab.classList.remove('active'));
-      document.getElementById(tabName).classList.add('active');
-    }
+            // Update sidebar active link
+            const navLinks = document.querySelectorAll('.sidebar .nav-link');
+            navLinks.forEach(link => link.classList.remove('active'));
+            document.querySelector(`.sidebar .nav-link[onclick="showTab('${tabName}')"]`).classList.add('active');
+        }
 
-    function redirectToChatbot() {
-      window.location.href = "/chatbot";
-    }
+        function redirectToChatbot() {
+            window.location.href = "/chatbot";
+        }
 
-    // When a file is selected, update the document name shown in the header.
-    function updateDocumentName(input) {
-      const fileName = input.files[0] ? input.files[0].name : '';
-      document.getElementById('document-name').innerText = fileName ? " - " + fileName : "";
+        // No longer updating file list on just file selection
+        function updateDocumentName(input) {
+            document.getElementById('document-name').innerText = input.files[0] ? " - " + input.files[0].name : "";
+        }
 
-      // Add file name to the list
-      const fileList = document.getElementById('uploaded-files');
-      const listItem = document.createElement('li');
-      listItem.className = 'list-group-item';
-      listItem.innerHTML = `
-        <span><strong>${fileName}</strong></span>
-        <a href="#" class="badge">View</a>
-      `;
-      fileList.appendChild(listItem);
 
-      // Show flash message
-      showFlashMessage('success');
-    }
+    </script>
+    <script>
+        document.querySelectorAll('.data-form').forEach(form => { // Select all forms with class 'data-form'
+            form.addEventListener('submit', function (event) {
+                event.preventDefault(); // Stop default form submission
 
-    // Handle form submissions to stay on the same page
-    document.getElementById('upload-form').addEventListener('submit', function(event) {
-      event.preventDefault();
-      showFlashMessage('success');
-    });
+                const formData = new FormData(this);
+                const tabId = this.dataset.tabId; // Get the tab ID from the form's data-tab-id attribute
 
-    document.getElementById('text-form').addEventListener('submit', function(event) {
-      event.preventDefault();
-      const text = event.target.elements.text.value;
-      addTextEntry(text);
-      showFlashMessage('success');
-    });
+                fetch('/manage_data_sources', {
+                    method: 'POST',
+                    body: formData,
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not OK');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.status === 'success') {
+                            // Handle successful submission
+                            updateUI(tabId, data.type, data.item, data.flashMessages);
+                            showTab(tabId); // Keep the current tab active
+                            // If you are using flash messages, they will also be displayed due to page reload (if you kept that in backend).
+                            // If you want to handle flash messages dynamically without reload, that's a more advanced step.
 
-    document.getElementById('website-form').addEventListener('submit', function(event) {
-      event.preventDefault();
-      const url = event.target.elements.website_url.value;
-      addWebsiteEntry(url);
-      showFlashMessage('success');
-    });
+                        } else {
+                            console.error('Error submitting data:', data.message);
+                            // Handle error - maybe display an error message in UI dynamically if needed
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Fetch error:', error);
+                        // Handle fetch error
+                    });
+            });
+        });
 
-    document.getElementById('qna-form').addEventListener('submit', function(event) {
-      event.preventDefault();
-      const question = event.target.elements.question.value;
-      const answer = event.target.elements.answer.value;
-      addQnAEntry(question, answer);
-      showFlashMessage('success');
-    });
+        function updateUI(tabId, itemType, item) {
+            if (itemType === 'file') {
+                const uploadedFilesList = document.getElementById('uploaded-files');
+                const newFileListItem = document.createElement('li');
+                newFileListItem.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
+                newFileListItem.dataset.itemId = 'TBD'; // If you get item ID from server, use it here.
+                newFileListItem.innerHTML = `
+                    <div>
+                        <strong>${item.content}</strong>
+                    </div>
+                    <div>
+                        <a href="/static/uploads/${item.content}" target="_blank"
+                            class="btn btn-sm btn-outline-primary me-2">View</a>
+                        <form action="#" method="POST" class="delete-form" style="display:inline;">
+                            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                        </form>
+                    </div>
+                `;
+                uploadedFilesList.appendChild(newFileListItem);
+                // You'd also need to re-attach event listeners for delete forms if you are handling delete via JS dynamically.
+                // For now, full page reload on delete is simpler.
 
-    function addTextEntry(text) {
-      const textList = document.getElementById('text-entries');
-      const listItem = document.createElement('li');
-      listItem.className = 'list-group-item';
-      listItem.innerText = text;
-      textList.appendChild(listItem);
-    }
+            } else if (itemType === 'text') {
+                const textEntriesList = document.getElementById('text-entries');
+                const newTextListItem = document.createElement('li');
+                newTextListItem.classList.add('list-group-item');
+                newTextListItem.dataset.itemId = 'TBD'; // If you get item ID from server, use it here.
+                newTextListItem.textContent = item.content;
+                textEntriesList.appendChild(newTextListItem);
 
-    function addWebsiteEntry(url) {
-      const websiteList = document.getElementById('website-entries');
-      const listItem = document.createElement('li');
-      listItem.className = 'list-group-item';
-      listItem.innerHTML = `<a href="${url}" target="_blank">${url}</a>`;
-      websiteList.appendChild(listItem);
-    }
+            } else if (itemType === 'website') {
+                const websiteLinksList = document.getElementById('website-links');
+                const newWebsiteListItem = document.createElement('li');
+                newWebsiteListItem.classList.add('list-group-item');
+                newWebsiteListItem.dataset.itemId = 'TBD'; // If you get item ID from server, use it here.
+                newWebsiteListItem.innerHTML = `
+                    <a href="${item.content}" target="_blank">${item.content}</a>
+                `;
+                websiteLinksList.appendChild(newWebsiteListItem);
 
-    function addQnAEntry(question, answer) {
-      const qnaList = document.getElementById('qna-entries');
-      const listItem = document.createElement('li');
-      listItem.className = 'list-group-item';
-      listItem.innerHTML = `
-        <div>
-          <strong>${question}</strong><br>
-          <span>${answer}</span>
-        </div>
-      `;
-      qnaList.appendChild(listItem);
-    }
+            } else if (itemType === 'qna') {
+                const qaEntriesList = document.getElementById('qa-entries');
+                const newQaListItem = document.createElement('li');
+                newQaListItem.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
+                newQaListItem.dataset.itemId = item.id; // Assuming server returns ID for Q&A
+                newQaListItem.innerHTML = `
+                    <div>
+                        <strong>${item.question}</strong><br>
+                        <span class="text-muted">${item.answer}</span>
+                    </div>
+                    <div>
+                        <form action="#" method="POST" class="delete-form" style="display:inline;">
+                            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                        </form>
+                    </div>
+                `;
+                qaEntriesList.appendChild(newQaListItem);
+                // Again, delete form event listeners might need to be re-attached if you are handling delete dynamically.
+            }
+        }
 
-    function showFlashMessage(type) {
-      const flashContainer = document.getElementById('flash-container');
-      flashContainer.classList.add('show');
-      setTimeout(() => {
-        flashContainer.classList.remove('show');
-      }, 3000);
-    }
-  </script>
+
+        // Check for flash messages on page load and make sure they are visible
+        document.addEventListener('DOMContentLoaded', function () {
+            const flashMessages = document.getElementById('flash-messages');
+            if (flashMessages) {
+                flashMessages.style.opacity = '1'; // Ensure opacity is 1
+                flashMessages.style.display = 'block'; // Ensure display is block
+            }
+        });
+    </script>
 </body>
 
 </html>

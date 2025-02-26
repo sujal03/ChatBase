@@ -1,12 +1,13 @@
 import os
 import requests
-from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
+import asyncio
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify, get_flashed_messages
 from flask_mysqldb import MySQL
 from werkzeug.security import generate_password_hash, check_password_hash
 from MySQLdb import IntegrityError
 
 #  ChromaDB imports
-from chroma import create_and_index_embeddings, generate_llm_response, vectordb, llm, add_text_to_vector_database, add_qa_to_vector_database
+from chroma import create_and_index_embeddings, generate_llm_response, vectordb, llm, add_text_to_vector_database, add_qa_to_vector_database, scrape_url
 
 
 # Flask App Initialization
@@ -148,43 +149,6 @@ def home():
         return render_template('home.html', email=session['email'])
     return redirect(url_for('login'))
 
-@app.route('/add_link', methods=['GET','POST'])
-def add_link():
-    # Check if the user is logged in (this assumes you have the session management in place)
-    if 'email' not in session:
-        return redirect(url_for('login'))  # Redirect to login if not logged in
-
-    if request.method == 'POST':
-        # Handle website URL
-        if 'website_url' in request.form:
-            website_url = request.form['website_url']
-            if website_url:
-                # Create a cursor and insert the website URL into the database
-                cur = mysql.connection.cursor()
-
-                # Check if the website URL already exists for the user
-                cur.execute(
-                    "SELECT * FROM data_sources WHERE user_email = %s AND type = %s AND content = %s",
-                    (session['email'], 'website', website_url)
-                )
-                existing_website = cur.fetchone()
-                if existing_website:
-                    flash("This website URL has already been added.", "warning")
-                    cur.close()
-                    return redirect(url_for('add_link'))
-
-                # Insert the website URL record into the database
-                cur.execute(
-                    "INSERT INTO data_sources (user_email, type, content) VALUES (%s, %s, %s)",
-                    (session['email'], 'website', website_url)
-                )
-                mysql.connection.commit()
-                cur.close()
-
-                flash("Website URL added successfully", "success")
-
-    return redirect(url_for('manage_data_sources'))  # Redirect to home after adding the link
-
 @app.route('/manage_data_sources', methods=['GET', 'POST'])
 def manage_data_sources():
     """Manage user data sources: files, text, websites, and Q&A."""
@@ -199,11 +163,10 @@ def manage_data_sources():
             file = request.files['file']
             if file.filename != '':
                 if not allowed_file(file.filename):
-                    flash("Invalid file format. Allowed formats are: txt, pdf, png, jpg, jpeg, gif", "danger")
-                    return redirect(url_for('manage_data_sources'))
+                    return jsonify({'status': 'error', 'message': "Invalid file format. Allowed formats are: txt, pdf, png, jpg, jpeg, gif"}), 400
 
-                file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
-
+                file_name = file.filename
+                file_path = os.path.join(app.config['UPLOAD_FOLDER'], file_name)
                 # Save the file to the upload folder
                 file.save(file_path)
 
@@ -216,11 +179,15 @@ def manage_data_sources():
                 # mysql.connection.commit()
                 # cur.close()
 
-                flash("File uploaded successfully", "success")
-
                 # Generate embeddings for uploaded file
+                item_data = {'content': file_name} # Data for UI update
+                data_type = 'file'
                 create_and_index_embeddings()
-                flash("Embeddings created and indexed successfully", "success")
+                flash("File uploaded and processed successfully!", "success") # Flash message
+                messages = get_flashed_messages(with_categories=True) # Get flashed messages
+
+                return jsonify({'status': 'success', 'type': data_type, 'item': item_data, 'flash_message': messages}), 200 # Include flash message in JSON
+
 
         # ✅ Handle Text Data Submission
         elif 'text' in request.form:
@@ -247,8 +214,14 @@ def manage_data_sources():
                 # mysql.connection.commit() 
                 # cur.close()
                 
-                add_text_to_vector_database(text_data)
-                flash("Text data added successfully", "success")
+                add_text_to_vector_database(text_data) # Keep this if needed in backend logic
+
+                item_data = {'content': text_data}
+                data_type = 'text'
+
+                flash("Text data added successfully!", "success") # Flash message
+                messages = get_flashed_messages(with_categories=True) # Get flashed messages
+                return jsonify({'status': 'success', 'type': data_type, 'item': item_data, 'flash_message': messages}), 200 # Include flash message
 
         # ✅ Handle Website URL Submission
         elif 'website' in request.form:
@@ -262,8 +235,22 @@ def manage_data_sources():
                 # )
                 # mysql.connection.commit()
                 # cur.close()
+                
+                # Scrape the website content (Keep scraping logic)
+                prompt = "Extract relevant information"  # Customize the prompt as needed
+                scraped_content = asyncio.run(scrape_url(website_url, prompt))
 
-                flash("Website URL added successfully", "success")
+                message_website = 'Website URL added and content indexed successfully!' if scraped_content not in ["Crawling disallowed by robots.txt", "No content extracted"] else 'Website URL added, but content extraction failed.'
+                if scraped_content not in ["Crawling disallowed by robots.txt", "No content extracted"]:
+                    add_text_to_vector_database(scraped_content) # Keep vector DB update
+                    flash(message_website, "success") # Flash message for success
+                else:
+                    flash(message_website, "warning") # Flash message for warning
+
+                item_data = {'content': website_url}
+                data_type = 'website'
+                messages = get_flashed_messages(with_categories=True) # Get flashed messages for website
+                return jsonify({'status': 'success', 'type': data_type, 'item': item_data, 'message': message_website, 'flash_message': messages}), 200 # Include flash message
 
         # ✅ Handle Q&A Submission
         elif 'question' in request.form and 'answer' in request.form:
@@ -279,8 +266,20 @@ def manage_data_sources():
                 # mysql.connection.commit()
                 # cur.close()
 
-                add_qa_to_vector_database(question, answer)
-                flash("Question and Answer submitted successfully.", "success")
+                add_qa_to_vector_database(question, answer) # Keep vector DB update
+
+                qa_id = len(questions_answers) + 1 # Example - replace with actual ID generation (replace with real logic)
+                item_data = {'question': question, 'answer': answer, 'id': qa_id, 'question_text': question, 'answer_text': answer} # Include question and answer again for UI
+
+                data_type = 'qna'
+
+                flash("Question and Answer submitted successfully.", "success") # Flash message
+                messages = get_flashed_messages(with_categories=True) # Get flashed messages
+                return jsonify({'status': 'success', 'type': data_type, 'item': item_data, 'flash_message': messages}), 200 # Include flash message
+
+        else:
+            return jsonify({'status': 'error', 'message': 'Invalid form submission'}), 400
+
 
     # ✅ Fetch User Data from Database
     cur = mysql.connection.cursor()
