@@ -466,4 +466,4 @@ def chatbot():
     return render_template('chatbot.html', email=session['email'], user_message=user_message, bot_response=bot_response)
 
 if __name__ == '__main__':
-    app.run(debug=True, port=7000)
+    app.run(debug=True, port=7000, host='0.0.0.0')
